@@ -8,7 +8,7 @@ import FullscreenViewer from '@/components/FullscreenViewer';
 import PresentationMode from '@/components/PresentationMode';
 
 function AppContent() {
-  const { selectedVenueId, addingMarker } = useApp();
+  const { selectedVenueId, addingMarker, settingHomeBase } = useApp();
   const [newMarker, setNewMarker] = useState<{ lat: number; lng: number } | null>(null);
 
   const handleMapClick = (lat: number, lng: number) => {
