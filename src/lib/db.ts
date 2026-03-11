@@ -18,7 +18,7 @@ export const PHOTO_TAGS: PhotoTag[] = [
 ];
 
 export const VENUE_TYPES = [
-  'Salão', 'Clube', 'Igreja', 'Área Externa', 'Restaurante',
+  'Salão', 'Clube', 'Igreja', 'Escola', 'Área Externa', 'Restaurante',
   'Hotel', 'Chácara', 'Espaço de Eventos', 'Trilha', 'Outro'
 ] as const;
 
@@ -27,6 +27,7 @@ export const VENUE_TYPE_COLORS: Record<string, string> = {
   'Salão': '48 96% 53%',       // gold
   'Clube': '280 70% 55%',      // purple
   'Igreja': '200 80% 55%',     // blue
+  'Escola': '35 90% 50%',      // amber
   'Área Externa': '140 60% 45%', // green
   'Restaurante': '20 85% 55%', // orange
   'Hotel': '330 70% 55%',      // pink
