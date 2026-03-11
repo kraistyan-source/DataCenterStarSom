@@ -145,7 +145,7 @@ interface EventMapProps {
 }
 
 export default function EventMap({ onMapClick }: EventMapProps) {
-  const { venues, selectedVenueId, setSelectedVenueId, filters, addingMarker, presentationMode, presentationCity } = useApp();
+  const { venues, selectedVenueId, setSelectedVenueId, filters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase } = useApp();
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
 
   const filteredVenues = venues.filter(v => {
@@ -161,13 +161,26 @@ export default function EventMap({ onMapClick }: EventMapProps) {
 
   const showLabels = zoom >= LABEL_MIN_ZOOM;
 
+  const getDistanceText = (venue: Venue): string | null => {
+    if (!homeBase) return null;
+    const km = distanceKm(homeBase.lat, homeBase.lng, venue.lat, venue.lng);
+    return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
+  };
+
+  const handleHomeBaseClick = (lat: number, lng: number) => {
+    setHomeBase({ lat, lng, name: 'Minha Empresa' });
+    setSettingHomeBase(false);
+  };
+
+  const homeBaseIcon = useMemo(() => getHomeBaseIcon(), []);
+
   return (
     <MapContainer
       center={DEFAULT_CENTER}
       zoom={DEFAULT_ZOOM}
       className="w-full h-full"
       zoomControl={true}
-      style={{ cursor: addingMarker ? 'crosshair' : 'grab' }}
+      style={{ cursor: addingMarker || settingHomeBase ? 'crosshair' : 'grab' }}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
@@ -176,12 +189,27 @@ export default function EventMap({ onMapClick }: EventMapProps) {
       <MapController />
       <ZoomTracker onZoomChange={setZoom} />
       {addingMarker && <MapClickHandler onMapClick={onMapClick} />}
+      {settingHomeBase && <HomeBaseClickHandler onSet={handleHomeBaseClick} />}
+      {homeBase && (
+        <Marker position={[homeBase.lat, homeBase.lng]} icon={homeBaseIcon}>
+          <Tooltip permanent direction="top" offset={[0, -14]} className="venue-label-tooltip homebase-tooltip">
+            🏠 {homeBase.name}
+          </Tooltip>
+          <Popup>
+            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '12px' }}>
+              <strong>{homeBase.name}</strong><br />
+              <span style={{ color: '#9090A0' }}>Base da empresa</span>
+            </div>
+          </Popup>
+        </Marker>
+      )}
       {filteredVenues.map(venue => (
         <VenueMarker
           key={venue.id}
           venue={venue}
           isSelected={selectedVenueId === venue.id}
           showLabel={showLabels}
+          distanceText={getDistanceText(venue)}
           onClick={() => setSelectedVenueId(venue.id)}
         />
       ))}
