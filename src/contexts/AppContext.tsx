@@ -48,6 +48,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [fullscreenPhotoIndex, setFullscreenPhotoIndex] = useState<number | null>(null);
   const [fullscreenPhotos, setFullscreenPhotos] = useState<VenuePhoto[]>([]);
   const [addingMarker, setAddingMarker] = useState(false);
+  const [homeBase, setHomeBaseState] = useState<HomeBase | null>(getHomeBase());
+  const [settingHomeBase, setSettingHomeBase] = useState(false);
+
+  const setHomeBase = useCallback((hb: HomeBase | null) => {
+    if (hb) saveHomeBase(hb);
+    setHomeBaseState(hb);
+  }, []);
 
   const refresh = useCallback(async () => {
     const [v, p, e] = await Promise.all([getAllVenues(), getAllPhotos(), getAllEvents()]);
