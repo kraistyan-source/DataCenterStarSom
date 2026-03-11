@@ -40,12 +40,13 @@ export default function FullscreenViewer() {
     >
       {photo.mediaType === 'video' ? (
         <video
-          src={mediaUrl}
           controls
           autoPlay
           className="max-w-[90vw] max-h-[90vh] object-contain"
           onClick={e => e.stopPropagation()}
-        />
+        >
+          <source src={mediaUrl} type={photo.mimeType || 'video/mp4'} />
+        </video>
       ) : (
         <img
           src={mediaUrl}
