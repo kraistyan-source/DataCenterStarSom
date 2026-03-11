@@ -27,10 +27,13 @@ export const EVENT_TYPES = [
   'Baile', 'Show', 'Festival', 'Outro'
 ] as const;
 
+export type PhotoCategory = 'evento' | 'estrutura';
+
 export interface VenuePhoto {
   id: string;
   venueId: string;
   eventId?: string;
+  category: PhotoCategory;
   data: string; // base64
   caption: string;
   tags: string[];

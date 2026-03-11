@@ -23,8 +23,10 @@ export default function PresentationMode() {
 
   useEffect(() => {
     if (selectedVenueId) {
-      getPhotosByVenue(selectedVenueId).then(p => {
-        setVenuePhotos(p);
+      getPhotosByVenue(selectedVenueId).then(allPhotos => {
+        // Only show event photos in presentation mode (not structure photos)
+        const eventOnly = allPhotos.filter(p => p.category === 'evento' || !p.category);
+        setVenuePhotos(eventOnly);
         setPhotoIndex(0);
       });
     }
@@ -88,6 +90,7 @@ export default function PresentationMode() {
   }
 
   // City selection + venue grid
+  // Only count event photos for presentation thumbnails
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -98,7 +101,7 @@ export default function PresentationMode() {
       <div className="flex items-center justify-between p-6 border-b border-border">
         <div>
           <h1 className="text-lg font-semibold text-foreground tracking-wider uppercase">Modo Apresentação</h1>
-          <p className="text-xs text-muted-foreground mt-1">Pressione ESC para sair</p>
+          <p className="text-xs text-muted-foreground mt-1 font-body">Mostrando apenas fotos dos eventos · Pressione ESC para sair</p>
         </div>
         <button onClick={() => setPresentationMode(false)} className="text-muted-foreground hover:text-foreground">
           <X className="w-6 h-6" />
@@ -131,7 +134,8 @@ export default function PresentationMode() {
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {cityVenues.map(v => {
-              const vPhotos = photos.filter(p => p.venueId === v.id);
+              // Only event photos
+              const vPhotos = photos.filter(p => p.venueId === v.id && (p.category === 'evento' || !p.category));
               const thumb = vPhotos[0];
               return (
                 <button

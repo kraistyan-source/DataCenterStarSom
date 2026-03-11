@@ -12,13 +12,13 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-const orchidIcon = new L.DivIcon({
+const markerIcon = new L.DivIcon({
   className: '',
   html: `<div style="
     width: 16px; height: 16px;
-    background: hsl(290 62% 52%);
-    border: 2px solid hsl(290 62% 70%);
-    box-shadow: 0 0 12px hsl(290 62% 52% / 0.6);
+    background: hsl(48 96% 53%);
+    border: 2px solid hsl(48 96% 70%);
+    box-shadow: 0 0 12px hsl(48 96% 53% / 0.6);
   "></div>`,
   iconSize: [16, 16],
   iconAnchor: [8, 8],
@@ -28,9 +28,9 @@ const selectedIcon = new L.DivIcon({
   className: '',
   html: `<div class="marker-pulse" style="
     width: 20px; height: 20px;
-    background: hsl(290 62% 52%);
+    background: hsl(48 96% 53%);
     border: 3px solid hsl(0 0% 100%);
-    box-shadow: 0 0 20px hsl(290 62% 52% / 0.8);
+    box-shadow: 0 0 20px hsl(48 96% 53% / 0.8);
   "></div>`,
   iconSize: [20, 20],
   iconAnchor: [10, 10],
@@ -102,7 +102,7 @@ export default function EventMap({ onMapClick }: EventMapProps) {
         <Marker
           key={venue.id}
           position={[venue.lat, venue.lng]}
-          icon={selectedVenueId === venue.id ? selectedIcon : orchidIcon}
+          icon={selectedVenueId === venue.id ? selectedIcon : markerIcon}
           eventHandlers={{
             click: () => setSelectedVenueId(venue.id),
           }}
