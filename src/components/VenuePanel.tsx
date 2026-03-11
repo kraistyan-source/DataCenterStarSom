@@ -1,0 +1,326 @@
+import { useState, useEffect, useRef } from 'react';
+import { X, Plus, Trash2, Camera, Calendar, Tag } from 'lucide-react';
+import { useApp } from '@/contexts/AppContext';
+import {
+  type Venue, type VenuePhoto, type VenueEvent,
+  getPhotosByVenue, getEventsByVenue,
+  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue,
+  VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
+} from '@/lib/db';
+import { motion, AnimatePresence } from 'framer-motion';
+
+export default function VenuePanel() {
+  const { selectedVenueId, setSelectedVenueId, venues, refresh, openFullscreen } = useApp();
+  const venue = venues.find(v => v.id === selectedVenueId);
+  const [photos, setPhotos] = useState<VenuePhoto[]>([]);
+  const [events, setEvents] = useState<VenueEvent[]>([]);
+  const [tab, setTab] = useState<'info' | 'photos' | 'events'>('photos');
+  const [editing, setEditing] = useState(false);
+  const [editData, setEditData] = useState<Venue | null>(null);
+  const [showAddEvent, setShowAddEvent] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!venue) return;
+    Promise.all([getPhotosByVenue(venue.id), getEventsByVenue(venue.id)]).then(([p, e]) => {
+      setPhotos(p);
+      setEvents(e);
+    });
+  }, [venue, selectedVenueId]);
+
+  if (!venue) return null;
+
+  const refreshLocal = async () => {
+    const [p, e] = await Promise.all([getPhotosByVenue(venue.id), getEventsByVenue(venue.id)]);
+    setPhotos(p);
+    setEvents(e);
+    await refresh();
+  };
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files) return;
+    for (const file of Array.from(files)) {
+      const reader = new FileReader();
+      reader.onload = async (ev) => {
+        const data = ev.target?.result as string;
+        await addPhoto({ venueId: venue.id, data, caption: '', tags: [] });
+        await refreshLocal();
+      };
+      reader.readAsDataURL(file);
+    }
+    e.target.value = '';
+  };
+
+  const handleDeleteVenue = async () => {
+    if (!confirm('Excluir este local e todos os dados?')) return;
+    await deleteVenue(venue.id);
+    setSelectedVenueId(null);
+    await refresh();
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editData) return;
+    await updateVenue(editData);
+    setEditing(false);
+    await refresh();
+  };
+
+  return (
+    <AnimatePresence>
+      <motion.div
+        initial={{ x: '100%' }}
+        animate={{ x: 0 }}
+        exit={{ x: '100%' }}
+        transition={{ type: 'tween', duration: 0.3 }}
+        className="absolute right-0 top-0 h-full w-[400px] bg-card border-l border-border z-[1000] flex flex-col overflow-hidden"
+      >
+        {/* Header */}
+        <div className="p-4 border-b border-border flex items-start justify-between">
+          <div className="flex-1 min-w-0">
+            <h2 className="text-sm font-semibold text-foreground truncate">{venue.name}</h2>
+            <p className="text-[10px] text-muted-foreground mt-0.5">{venue.city} · {venue.venueType}</p>
+          </div>
+          <button onClick={() => setSelectedVenueId(null)} className="text-muted-foreground hover:text-foreground ml-2 mt-0.5">
+            <X className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Tabs */}
+        <div className="flex border-b border-border">
+          {(['photos', 'events', 'info'] as const).map(t => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className={`flex-1 text-[10px] uppercase tracking-widest py-2.5 transition-colors ${
+                tab === t ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              {t === 'photos' ? `Fotos (${photos.length})` : t === 'events' ? `Eventos (${events.length})` : 'Info'}
+            </button>
+          ))}
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto">
+          {tab === 'photos' && (
+            <div className="p-3">
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                Adicionar Fotos
+              </button>
+              <input ref={fileRef} type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
+
+              {photos.length === 0 ? (
+                <p className="text-center text-xs text-muted-foreground py-8 font-body">Nenhuma foto adicionada</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-1">
+                  {photos.map((p, i) => (
+                    <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photos, i)}>
+                      <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+                        {p.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-0.5">
+                            {p.tags.map(t => (
+                              <span key={t} className="text-[8px] bg-primary/30 text-primary-foreground px-1 py-0.5">
+                                {PHOTO_TAGS.find(pt => pt.id === t)?.label || t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={async (e) => { e.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
+                        className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'events' && (
+            <div className="p-3">
+              <button
+                onClick={() => setShowAddEvent(true)}
+                className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                Novo Evento
+              </button>
+
+              {showAddEvent && (
+                <AddEventForm
+                  venueId={venue.id}
+                  onClose={() => setShowAddEvent(false)}
+                  onSave={refreshLocal}
+                />
+              )}
+
+              {events.length === 0 ? (
+                <p className="text-center text-xs text-muted-foreground py-8 font-body">Nenhum evento registrado</p>
+              ) : (
+                <div className="space-y-2">
+                  {events.map(ev => (
+                    <div key={ev.id} className="border border-border p-3 group">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <div className="text-xs font-medium text-foreground">{ev.name}</div>
+                          <div className="text-[10px] text-muted-foreground mt-0.5 flex items-center gap-2">
+                            <span className="flex items-center gap-1"><Calendar className="w-3 h-3" />{ev.date}</span>
+                            <span className="flex items-center gap-1"><Tag className="w-3 h-3" />{ev.eventType}</span>
+                          </div>
+                          {ev.notes && <p className="text-[10px] text-muted-foreground mt-1 font-body">{ev.notes}</p>}
+                        </div>
+                        <button
+                          onClick={async () => { await deleteEvent(ev.id); await refreshLocal(); }}
+                          className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {tab === 'info' && (
+            <div className="p-3">
+              {editing && editData ? (
+                <div className="space-y-3">
+                  <Field label="Nome" value={editData.name} onChange={v => setEditData({...editData, name: v})} />
+                  <Field label="Cidade" value={editData.city} onChange={v => setEditData({...editData, city: v})} />
+                  <Field label="Endereço" value={editData.address} onChange={v => setEditData({...editData, address: v})} />
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Tipo</label>
+                    <select
+                      value={editData.venueType}
+                      onChange={e => setEditData({...editData, venueType: e.target.value})}
+                      className="w-full bg-muted text-foreground text-xs px-3 py-2 border border-border focus:outline-none focus:border-primary"
+                    >
+                      {VENUE_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <Field label="Capacidade" value={editData.capacity} onChange={v => setEditData({...editData, capacity: v})} />
+                  <div>
+                    <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Notas</label>
+                    <textarea
+                      value={editData.notes}
+                      onChange={e => setEditData({...editData, notes: e.target.value})}
+                      className="w-full bg-muted text-foreground text-xs px-3 py-2 border border-border focus:outline-none focus:border-primary h-20 resize-none font-body"
+                    />
+                  </div>
+                  <div className="flex gap-2">
+                    <button onClick={handleSaveEdit} className="flex-1 bg-primary text-primary-foreground text-[10px] uppercase tracking-wider py-2">Salvar</button>
+                    <button onClick={() => setEditing(false)} className="flex-1 border border-border text-muted-foreground text-[10px] uppercase tracking-wider py-2">Cancelar</button>
+                  </div>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <InfoRow label="Endereço" value={venue.address || '—'} />
+                  <InfoRow label="Tipo" value={venue.venueType} />
+                  <InfoRow label="Capacidade" value={venue.capacity || '—'} />
+                  <InfoRow label="Coordenadas" value={`${venue.lat.toFixed(4)}, ${venue.lng.toFixed(4)}`} />
+                  {venue.notes && (
+                    <div>
+                      <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Notas</label>
+                      <p className="text-xs text-foreground font-body">{venue.notes}</p>
+                    </div>
+                  )}
+                  <div className="flex gap-2 pt-2">
+                    <button
+                      onClick={() => { setEditing(true); setEditData({...venue}); }}
+                      className="flex-1 border border-border text-muted-foreground hover:text-foreground text-[10px] uppercase tracking-wider py-2 transition-colors"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={handleDeleteVenue}
+                      className="flex-1 border border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground text-[10px] uppercase tracking-wider py-2 transition-colors"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </AnimatePresence>
+  );
+}
+
+function Field({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <div>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">{label}</label>
+      <input
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        className="w-full bg-muted text-foreground text-xs px-3 py-2 border border-border focus:outline-none focus:border-primary"
+      />
+    </div>
+  );
+}
+
+function InfoRow({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-0.5 block">{label}</label>
+      <p className="text-xs text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function AddEventForm({ venueId, onClose, onSave }: { venueId: string; onClose: () => void; onSave: () => void }) {
+  const [name, setName] = useState('');
+  const [date, setDate] = useState('');
+  const [eventType, setEventType] = useState<string>(EVENT_TYPES[0]);
+  const [clientType, setClientType] = useState('');
+  const [notes, setNotes] = useState('');
+
+  const handleSubmit = async () => {
+    if (!name || !date) return;
+    await addEvent({ venueId, name, date, eventType, clientType, notes });
+    onSave();
+    onClose();
+  };
+
+  return (
+    <div className="border border-primary/30 p-3 mb-3 space-y-2">
+      <Field label="Nome do Evento" value={name} onChange={setName} />
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Data</label>
+        <input type="date" value={date} onChange={e => setDate(e.target.value)}
+          className="w-full bg-muted text-foreground text-xs px-3 py-2 border border-border focus:outline-none focus:border-primary" />
+      </div>
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Tipo de Evento</label>
+        <select value={eventType} onChange={e => setEventType(e.target.value)}
+          className="w-full bg-muted text-foreground text-xs px-3 py-2 border border-border focus:outline-none focus:border-primary">
+          {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+        </select>
+      </div>
+      <Field label="Tipo de Cliente" value={clientType} onChange={setClientType} />
+      <div>
+        <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Notas</label>
+        <textarea value={notes} onChange={e => setNotes(e.target.value)}
+          className="w-full bg-muted text-foreground text-xs px-3 py-2 border border-border focus:outline-none focus:border-primary h-16 resize-none font-body" />
+      </div>
+      <div className="flex gap-2">
+        <button onClick={handleSubmit} className="flex-1 bg-primary text-primary-foreground text-[10px] uppercase tracking-wider py-2">Salvar</button>
+        <button onClick={onClose} className="flex-1 border border-border text-muted-foreground text-[10px] uppercase tracking-wider py-2">Cancelar</button>
+      </div>
+    </div>
+  );
+}
