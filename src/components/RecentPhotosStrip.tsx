@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Camera, X, ChevronLeft, Play } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useMediaUrls } from '@/hooks/use-media-url';
 
 export default function RecentPhotosStrip() {
   const { photos, venues, events, openFullscreen } = useApp();
