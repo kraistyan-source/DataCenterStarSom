@@ -89,6 +89,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fullscreenPhotoIndex, fullscreenPhotos, openFullscreen, closeFullscreen,
       refresh,
       addingMarker, setAddingMarker,
+      homeBase, setHomeBase, settingHomeBase, setSettingHomeBase,
     }}>
       {children}
     </AppContext.Provider>
