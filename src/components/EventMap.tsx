@@ -49,6 +49,31 @@ function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number
   return null;
 }
 
+function HomeBaseClickHandler({ onSet }: { onSet: (lat: number, lng: number) => void }) {
+  useMapEvents({
+    click(e) {
+      onSet(e.latlng.lat, e.latlng.lng);
+    },
+  });
+  return null;
+}
+
+function getHomeBaseIcon() {
+  return new L.DivIcon({
+    className: '',
+    html: `<div style="
+      width: 22px; height: 22px;
+      background: hsl(48 96% 53%);
+      border: 3px solid hsl(0 0% 100%);
+      border-radius: 4px;
+      box-shadow: 0 0 16px hsl(48 96% 53% / 0.6);
+      display: flex; align-items: center; justify-content: center;
+    "><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="hsl(0 0% 4%)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+  });
+}
+
 function MapController() {
   const { presentationMode, presentationCity, venues } = useApp();
   const map = useMap();
