@@ -13,6 +13,7 @@ export default function Sidebar() {
     addingMarker, setAddingMarker,
     refresh, photos, events,
     homeBase, settingHomeBase, setSettingHomeBase,
+    roadDistances,
   } = useApp();
 
   const [importing, setImporting] = useState(false);
@@ -231,8 +232,12 @@ export default function Sidebar() {
                 <div className="text-[10px] text-muted-foreground mt-0.5">
                   {v.city} · {v.venueType}
                   {homeBase && (() => {
-                    const km = distanceKm(homeBase.lat, homeBase.lng, v.lat, v.lng);
-                    return <span className="text-primary ml-1">· {km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}</span>;
+                    const km = roadDistances[v.id];
+                    if (km !== undefined) {
+                      return <span className="text-primary ml-1">· {km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}</span>;
+                    }
+                    const straight = distanceKm(homeBase.lat, homeBase.lng, v.lat, v.lng);
+                    return <span className="text-primary/60 ml-1">· ~{straight.toFixed(1)}km</span>;
                   })()}
                 </div>
                 <div className="text-[10px] text-muted-foreground mt-0.5">

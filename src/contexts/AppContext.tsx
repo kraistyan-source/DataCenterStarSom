@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import type { Venue, VenuePhoto, VenueEvent } from '@/lib/db';
 import { getAllVenues, getAllPhotos, getAllEvents } from '@/lib/db';
 import { type FilterState, defaultFilters } from '@/lib/store';
-import { type HomeBase, getHomeBase, setHomeBase as saveHomeBase } from '@/lib/distance';
+import { type HomeBase, getHomeBase, setHomeBase as saveHomeBase, fetchRoadDistancesBatch } from '@/lib/distance';
 
 interface AppState {
   venues: Venue[];
@@ -27,6 +27,7 @@ interface AppState {
   setHomeBase: (hb: HomeBase | null) => void;
   settingHomeBase: boolean;
   setSettingHomeBase: (v: boolean) => void;
+  roadDistances: Record<string, number>;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -50,10 +51,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [addingMarker, setAddingMarker] = useState(false);
   const [homeBase, setHomeBaseState] = useState<HomeBase | null>(getHomeBase());
   const [settingHomeBase, setSettingHomeBase] = useState(false);
+  const [roadDistances, setRoadDistances] = useState<Record<string, number>>({});
 
   const setHomeBase = useCallback((hb: HomeBase | null) => {
     if (hb) saveHomeBase(hb);
     setHomeBaseState(hb);
+    setRoadDistances({});
   }, []);
 
   const refresh = useCallback(async () => {
@@ -64,6 +67,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => { refresh(); }, [refresh]);
+
+  // Fetch road distances when homeBase or venues change
+  useEffect(() => {
+    if (!homeBase || venues.length === 0) return;
+    fetchRoadDistancesBatch(
+      homeBase.lat, homeBase.lng,
+      venues.map(v => ({ id: v.id, lat: v.lat, lng: v.lng }))
+    ).then(setRoadDistances);
+  }, [homeBase, venues]);
 
   const setFilters = useCallback((partial: Partial<FilterState>) => {
     setFiltersState(prev => ({ ...prev, ...partial }));
@@ -90,6 +102,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       refresh,
       addingMarker, setAddingMarker,
       homeBase, setHomeBase, settingHomeBase, setSettingHomeBase,
+      roadDistances,
     }}>
       {children}
     </AppContext.Provider>

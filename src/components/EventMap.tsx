@@ -145,7 +145,7 @@ interface EventMapProps {
 }
 
 export default function EventMap({ onMapClick }: EventMapProps) {
-  const { venues, selectedVenueId, setSelectedVenueId, filters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase } = useApp();
+  const { venues, selectedVenueId, setSelectedVenueId, filters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
 
   const filteredVenues = venues.filter(v => {
@@ -163,8 +163,13 @@ export default function EventMap({ onMapClick }: EventMapProps) {
 
   const getDistanceText = (venue: Venue): string | null => {
     if (!homeBase) return null;
-    const km = distanceKm(homeBase.lat, homeBase.lng, venue.lat, venue.lng);
-    return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
+    const km = roadDistances[venue.id];
+    if (km !== undefined) {
+      return km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`;
+    }
+    // Fallback to straight-line while loading
+    const straight = distanceKm(homeBase.lat, homeBase.lng, venue.lat, venue.lng);
+    return `~${straight.toFixed(1)}km`;
   };
 
   const handleHomeBaseClick = (lat: number, lng: number) => {
