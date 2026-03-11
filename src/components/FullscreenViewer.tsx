@@ -36,12 +36,22 @@ export default function FullscreenViewer() {
       className="fixed inset-0 z-[5000] bg-nocturne flex items-center justify-center"
       onClick={closeFullscreen}
     >
-      <img
-        src={photo.data}
-        alt={photo.caption || 'Foto'}
-        className="max-w-[90vw] max-h-[90vh] object-contain"
-        onClick={e => e.stopPropagation()}
-      />
+      {photo.mediaType === 'video' ? (
+        <video
+          src={photo.data}
+          controls
+          autoPlay
+          className="max-w-[90vw] max-h-[90vh] object-contain"
+          onClick={e => e.stopPropagation()}
+        />
+      ) : (
+        <img
+          src={photo.data}
+          alt={photo.caption || 'Foto'}
+          className="max-w-[90vw] max-h-[90vh] object-contain"
+          onClick={e => e.stopPropagation()}
+        />
+      )}
 
       {photo.caption && (
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-card/90 px-4 py-2 border border-border">
