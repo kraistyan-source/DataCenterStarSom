@@ -50,9 +50,10 @@ export interface VenuePhoto {
   venueId: string;
   eventId?: string;
   category: PhotoCategory;
-  data: string; // base64 for photos, blob URL placeholder for videos
+  data: string; // base64 for photos, empty string for blob-stored videos
   mediaType?: MediaType; // defaults to 'photo' for backwards compat
-  videoBlob?: Blob; // stored separately for videos
+  blob?: Blob; // raw file blob for videos (much more efficient than base64)
+  mimeType?: string; // e.g. 'video/mp4'
   caption: string;
   tags: string[];
   createdAt: string;

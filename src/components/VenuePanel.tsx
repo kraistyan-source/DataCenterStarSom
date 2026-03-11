@@ -46,20 +46,42 @@ export default function VenuePanel() {
     if (!files) return;
     for (const file of Array.from(files)) {
       const isVideo = file.type.startsWith('video/');
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        const data = ev.target?.result as string;
+      
+      if (isVideo) {
+        // Store video as Blob (much more efficient than base64)
+        // Fix MOV MIME type for browser compatibility
+        const mimeType = file.type === 'video/quicktime' ? 'video/mp4' : file.type;
+        const blob = new Blob([file], { type: mimeType });
+        
+        // Generate a small thumbnail placeholder
         await addPhoto({
           venueId: venue.id,
-          data,
+          data: '', // no base64 for videos
           caption: '',
           tags: [],
           category,
-          mediaType: isVideo ? 'video' : 'photo',
+          mediaType: 'video',
+          blob,
+          mimeType,
         });
         await refreshLocal();
-      };
-      reader.readAsDataURL(file);
+      } else {
+        // Photos: keep base64 (they're small)
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          const data = ev.target?.result as string;
+          await addPhoto({
+            venueId: venue.id,
+            data,
+            caption: '',
+            tags: [],
+            category,
+            mediaType: 'photo',
+          });
+          await refreshLocal();
+        };
+        reader.readAsDataURL(file);
+      }
     }
     e.target.value = '';
   };
