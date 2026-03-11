@@ -6,6 +6,7 @@ import VenuePanel from '@/components/VenuePanel';
 import AddVenueDialog from '@/components/AddVenueDialog';
 import FullscreenViewer from '@/components/FullscreenViewer';
 import PresentationMode from '@/components/PresentationMode';
+import RecentPhotosStrip from '@/components/RecentPhotosStrip';
 
 function AppContent() {
   const { selectedVenueId, addingMarker, settingHomeBase } = useApp();
@@ -31,6 +32,7 @@ function AppContent() {
             Clique no mapa para definir o local da sua empresa
           </div>
         )}
+        <RecentPhotosStrip />
         <EventMap onMapClick={handleMapClick} />
         {selectedVenueId && <VenuePanel />}
       </div>
