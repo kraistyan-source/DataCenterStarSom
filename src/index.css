@@ -114,6 +114,12 @@
   border-top-color: hsl(0 0% 4% / 0.85) !important;
 }
 
+.homebase-tooltip.leaflet-tooltip {
+  background: hsl(48 96% 53% / 0.15) !important;
+  border: 1px solid hsl(48 96% 53% / 0.4) !important;
+  color: hsl(48 96% 70%) !important;
+}
+
 /* Custom marker pulse */
 @keyframes marker-pulse {
   0%, 100% { box-shadow: 0 0 0 0 hsl(48 96% 53% / 0.4); }
