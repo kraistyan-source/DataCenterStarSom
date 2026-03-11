@@ -101,7 +101,7 @@ export default function VenuePanel() {
     await refresh();
   };
 
-  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>) => (
+  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>, mediaUrls: Record<string, string>) => (
     <div className="p-3">
       <button
         onClick={() => fileRef.current?.click()}
