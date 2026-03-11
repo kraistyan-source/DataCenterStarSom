@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import type { Venue, VenuePhoto, VenueEvent } from '@/lib/db';
 import { getAllVenues, getAllPhotos, getAllEvents } from '@/lib/db';
 import { type FilterState, defaultFilters } from '@/lib/store';
+import { type HomeBase, getHomeBase, setHomeBase as saveHomeBase } from '@/lib/distance';
 
 interface AppState {
   venues: Venue[];
