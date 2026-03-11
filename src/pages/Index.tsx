@@ -26,6 +26,11 @@ function AppContent() {
             Clique no mapa para posicionar o marcador
           </div>
         )}
+        {settingHomeBase && (
+          <div className="absolute top-3 left-1/2 -translate-x-1/2 z-[1000] bg-primary text-primary-foreground text-[10px] uppercase tracking-widest px-4 py-2">
+            Clique no mapa para definir o local da sua empresa
+          </div>
+        )}
         <EventMap onMapClick={handleMapClick} />
         {selectedVenueId && <VenuePanel />}
       </div>
