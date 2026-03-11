@@ -19,6 +19,7 @@ export default function RecentPhotosStrip() {
     const event = photo.eventId ? events.find(e => e.id === photo.eventId) : null;
     return { venueName: venue?.name || '', eventName: event?.name || '' };
   };
+  const mediaUrls = useMediaUrls(recentPhotos);
 
   if (recentPhotos.length === 0) return null;
 
