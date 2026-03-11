@@ -13,6 +13,7 @@ export default function Sidebar() {
     addingMarker, setAddingMarker,
     refresh, photos, events,
     homeBase, settingHomeBase, setSettingHomeBase,
+    roadDistances,
   } = useApp();
 
   const [importing, setImporting] = useState(false);
