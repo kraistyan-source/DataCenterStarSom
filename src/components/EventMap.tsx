@@ -106,17 +106,12 @@ interface VenueMarkerProps {
   venue: Venue;
   isSelected: boolean;
   showLabel: boolean;
+  distanceText: string | null;
   onClick: () => void;
 }
 
-function VenueMarker({ venue, isSelected, showLabel, onClick }: VenueMarkerProps) {
+function VenueMarker({ venue, isSelected, showLabel, distanceText, onClick }: VenueMarkerProps) {
   const icon = useMemo(() => getMarkerIcon(venue.venueType, isSelected), [venue.venueType, isSelected]);
-
-  const distLabel = useMemo(() => {
-    // We access homeBase from the outer scope via a prop or context - but VenueMarker doesn't have it
-    // So we pass it as prop
-    return null;
-  }, []);
 
   return (
     <Marker
