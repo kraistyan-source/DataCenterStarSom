@@ -112,6 +112,12 @@ interface VenueMarkerProps {
 function VenueMarker({ venue, isSelected, showLabel, onClick }: VenueMarkerProps) {
   const icon = useMemo(() => getMarkerIcon(venue.venueType, isSelected), [venue.venueType, isSelected]);
 
+  const distLabel = useMemo(() => {
+    // We access homeBase from the outer scope via a prop or context - but VenueMarker doesn't have it
+    // So we pass it as prop
+    return null;
+  }, []);
+
   return (
     <Marker
       position={[venue.lat, venue.lng]}
@@ -125,13 +131,14 @@ function VenueMarker({ venue, isSelected, showLabel, onClick }: VenueMarkerProps
           offset={[0, -12]}
           className="venue-label-tooltip"
         >
-          {venue.name}
+          {venue.name}{distanceText ? ` · ${distanceText}` : ''}
         </Tooltip>
       )}
       <Popup>
         <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '12px' }}>
           <strong>{venue.name}</strong><br />
           <span style={{ color: '#9090A0' }}>{venue.city} · {venue.venueType}</span>
+          {distanceText && <><br /><span style={{ color: '#D4A843' }}>{distanceText}</span></>}
         </div>
       </Popup>
     </Marker>
