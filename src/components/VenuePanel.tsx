@@ -45,10 +45,18 @@ export default function VenuePanel() {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
+      const isVideo = file.type.startsWith('video/');
       const reader = new FileReader();
       reader.onload = async (ev) => {
         const data = ev.target?.result as string;
-        await addPhoto({ venueId: venue.id, data, caption: '', tags: [], category });
+        await addPhoto({
+          venueId: venue.id,
+          data,
+          caption: '',
+          tags: [],
+          category,
+          mediaType: isVideo ? 'video' : 'photo',
+        });
         await refreshLocal();
       };
       reader.readAsDataURL(file);
