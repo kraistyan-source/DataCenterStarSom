@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Search, MapPin, Download, Upload, Presentation, Plus } from 'lucide-react';
+import { Search, MapPin, Download, Upload, Presentation, Plus, Home } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { VENUE_TYPES, EVENT_TYPES } from '@/lib/db';
 import { exportDatabase, importDatabase } from '@/lib/db';
+import { distanceKm } from '@/lib/distance';
 
 export default function Sidebar() {
   const {
@@ -11,6 +12,7 @@ export default function Sidebar() {
     setPresentationMode, setPresentationCity,
     addingMarker, setAddingMarker,
     refresh, photos, events,
+    homeBase, settingHomeBase, setSettingHomeBase,
   } = useApp();
 
   const [importing, setImporting] = useState(false);
@@ -181,6 +183,19 @@ export default function Sidebar() {
           {addingMarker ? 'Clique no mapa' : 'Adicionar'}
         </button>
         <button
+          onClick={() => setSettingHomeBase(!settingHomeBase)}
+          className={`flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-2 px-3 border transition-colors ${
+            settingHomeBase
+              ? 'bg-primary text-primary-foreground border-primary'
+              : homeBase
+                ? 'border-primary/50 text-primary hover:border-primary'
+                : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground'
+          }`}
+          title={homeBase ? 'Reposicionar empresa' : 'Definir local da empresa'}
+        >
+          <Home className="w-3 h-3" />
+        </button>
+        <button
           onClick={handlePresentation}
           className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-2 px-3 border border-border text-muted-foreground hover:text-foreground hover:border-secondary transition-colors"
           title="Modo Apresentação"
@@ -213,7 +228,13 @@ export default function Sidebar() {
                 }`}
               >
                 <div className="text-xs font-medium text-foreground">{v.name}</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">{v.city} · {v.venueType}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">
+                  {v.city} · {v.venueType}
+                  {homeBase && (() => {
+                    const km = distanceKm(homeBase.lat, homeBase.lng, v.lat, v.lng);
+                    return <span className="text-primary ml-1">· {km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}</span>;
+                  })()}
+                </div>
                 <div className="text-[10px] text-muted-foreground mt-0.5">
                   {venuePhotos.length} fotos · {venueEvents.length} eventos
                 </div>

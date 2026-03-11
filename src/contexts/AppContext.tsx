@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect } fr
 import type { Venue, VenuePhoto, VenueEvent } from '@/lib/db';
 import { getAllVenues, getAllPhotos, getAllEvents } from '@/lib/db';
 import { type FilterState, defaultFilters } from '@/lib/store';
+import { type HomeBase, getHomeBase, setHomeBase as saveHomeBase } from '@/lib/distance';
 
 interface AppState {
   venues: Venue[];
@@ -22,6 +23,10 @@ interface AppState {
   refresh: () => Promise<void>;
   addingMarker: boolean;
   setAddingMarker: (v: boolean) => void;
+  homeBase: HomeBase | null;
+  setHomeBase: (hb: HomeBase | null) => void;
+  settingHomeBase: boolean;
+  setSettingHomeBase: (v: boolean) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
@@ -43,6 +48,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [fullscreenPhotoIndex, setFullscreenPhotoIndex] = useState<number | null>(null);
   const [fullscreenPhotos, setFullscreenPhotos] = useState<VenuePhoto[]>([]);
   const [addingMarker, setAddingMarker] = useState(false);
+  const [homeBase, setHomeBaseState] = useState<HomeBase | null>(getHomeBase());
+  const [settingHomeBase, setSettingHomeBase] = useState(false);
+
+  const setHomeBase = useCallback((hb: HomeBase | null) => {
+    if (hb) saveHomeBase(hb);
+    setHomeBaseState(hb);
+  }, []);
 
   const refresh = useCallback(async () => {
     const [v, p, e] = await Promise.all([getAllVenues(), getAllPhotos(), getAllEvents()]);
@@ -77,6 +89,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       fullscreenPhotoIndex, fullscreenPhotos, openFullscreen, closeFullscreen,
       refresh,
       addingMarker, setAddingMarker,
+      homeBase, setHomeBase, settingHomeBase, setSettingHomeBase,
     }}>
       {children}
     </AppContext.Provider>
