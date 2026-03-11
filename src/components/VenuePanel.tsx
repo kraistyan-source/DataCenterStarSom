@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
   getPhotosByVenue, getEventsByVenue,
