@@ -228,7 +228,13 @@ export default function Sidebar() {
                 }`}
               >
                 <div className="text-xs font-medium text-foreground">{v.name}</div>
-                <div className="text-[10px] text-muted-foreground mt-0.5">{v.city} · {v.venueType}</div>
+                <div className="text-[10px] text-muted-foreground mt-0.5">
+                  {v.city} · {v.venueType}
+                  {homeBase && (() => {
+                    const km = distanceKm(homeBase.lat, homeBase.lng, v.lat, v.lng);
+                    return <span className="text-primary ml-1">· {km < 1 ? `${Math.round(km * 1000)}m` : `${km.toFixed(1)}km`}</span>;
+                  })()}
+                </div>
                 <div className="text-[10px] text-muted-foreground mt-0.5">
                   {venuePhotos.length} fotos · {venueEvents.length} eventos
                 </div>
