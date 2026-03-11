@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import {
-  type Venue, type VenuePhoto, type VenueEvent,
+  type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
   getPhotosByVenue, getEventsByVenue,
   addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
@@ -14,11 +14,12 @@ export default function VenuePanel() {
   const venue = venues.find(v => v.id === selectedVenueId);
   const [photos, setPhotos] = useState<VenuePhoto[]>([]);
   const [events, setEvents] = useState<VenueEvent[]>([]);
-  const [tab, setTab] = useState<'info' | 'photos' | 'events'>('photos');
+  const [tab, setTab] = useState<'evento' | 'estrutura' | 'events' | 'info'>('evento');
   const [editing, setEditing] = useState(false);
   const [editData, setEditData] = useState<Venue | null>(null);
   const [showAddEvent, setShowAddEvent] = useState(false);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const fileRefEvento = useRef<HTMLInputElement>(null);
+  const fileRefEstrutura = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (!venue) return;
@@ -30,6 +31,9 @@ export default function VenuePanel() {
 
   if (!venue) return null;
 
+  const eventPhotos = photos.filter(p => p.category === 'evento' || !p.category);
+  const structurePhotos = photos.filter(p => p.category === 'estrutura');
+
   const refreshLocal = async () => {
     const [p, e] = await Promise.all([getPhotosByVenue(venue.id), getEventsByVenue(venue.id)]);
     setPhotos(p);
@@ -37,14 +41,14 @@ export default function VenuePanel() {
     await refresh();
   };
 
-  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>, category: PhotoCategory) => {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
       const reader = new FileReader();
       reader.onload = async (ev) => {
         const data = ev.target?.result as string;
-        await addPhoto({ venueId: venue.id, data, caption: '', tags: [] });
+        await addPhoto({ venueId: venue.id, data, caption: '', tags: [], category });
         await refreshLocal();
       };
       reader.readAsDataURL(file);
@@ -65,6 +69,66 @@ export default function VenuePanel() {
     setEditing(false);
     await refresh();
   };
+
+  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>) => (
+    <div className="p-3">
+      <button
+        onClick={() => fileRef.current?.click()}
+        className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
+      >
+        <Camera className="w-3.5 h-3.5" />
+        {category === 'evento' ? 'Adicionar Fotos do Evento' : 'Adicionar Fotos da Estrutura'}
+      </button>
+      <input ref={fileRef} type="file" accept="image/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+
+      {category === 'estrutura' && (
+        <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
+          <p className="text-[10px] text-muted-foreground font-body leading-relaxed">
+            <Wrench className="w-3 h-3 inline mr-1 text-primary" />
+            Fotos da estrutura montada <strong className="text-foreground">sem iluminação</strong> — para a equipe visualizar como ficou a montagem e ter referências.
+          </p>
+        </div>
+      )}
+
+      {photoList.length === 0 ? (
+        <p className="text-center text-xs text-muted-foreground py-8 font-body">
+          {category === 'evento' ? 'Nenhuma foto do evento' : 'Nenhuma foto da estrutura'}
+        </p>
+      ) : (
+        <div className="grid grid-cols-2 gap-1">
+          {photoList.map((p, i) => (
+            <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
+              <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+              <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+                {p.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-0.5">
+                    {p.tags.map(t => (
+                      <span key={t} className="text-[8px] bg-primary/30 text-primary-foreground px-1 py-0.5">
+                        {PHOTO_TAGS.find(pt => pt.id === t)?.label || t}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button
+                onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
+                className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <Trash2 className="w-3 h-3" />
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+
+  const tabs = [
+    { key: 'evento' as const, label: `Evento (${eventPhotos.length})`, icon: Sparkles },
+    { key: 'estrutura' as const, label: `Estrutura (${structurePhotos.length})`, icon: Wrench },
+    { key: 'events' as const, label: `Registros (${events.length})`, icon: Calendar },
+    { key: 'info' as const, label: 'Info', icon: Tag },
+  ];
 
   return (
     <AnimatePresence>
@@ -88,62 +152,24 @@ export default function VenuePanel() {
 
         {/* Tabs */}
         <div className="flex border-b border-border">
-          {(['photos', 'events', 'info'] as const).map(t => (
+          {tabs.map(t => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`flex-1 text-[10px] uppercase tracking-widest py-2.5 transition-colors ${
-                tab === t ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
+              key={t.key}
+              onClick={() => setTab(t.key)}
+              className={`flex-1 text-[9px] uppercase tracking-widest py-2.5 transition-colors flex items-center justify-center gap-1 ${
+                tab === t.key ? 'text-primary border-b-2 border-primary' : 'text-muted-foreground hover:text-foreground'
               }`}
             >
-              {t === 'photos' ? `Fotos (${photos.length})` : t === 'events' ? `Eventos (${events.length})` : 'Info'}
+              <t.icon className="w-3 h-3" />
+              <span className="hidden sm:inline">{t.label}</span>
             </button>
           ))}
         </div>
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {tab === 'photos' && (
-            <div className="p-3">
-              <button
-                onClick={() => fileRef.current?.click()}
-                className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
-              >
-                <Camera className="w-3.5 h-3.5" />
-                Adicionar Fotos
-              </button>
-              <input ref={fileRef} type="file" accept="image/*" multiple onChange={handlePhotoUpload} className="hidden" />
-
-              {photos.length === 0 ? (
-                <p className="text-center text-xs text-muted-foreground py-8 font-body">Nenhuma foto adicionada</p>
-              ) : (
-                <div className="grid grid-cols-2 gap-1">
-                  {photos.map((p, i) => (
-                    <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photos, i)}>
-                      <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
-                        {p.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-0.5">
-                            {p.tags.map(t => (
-                              <span key={t} className="text-[8px] bg-primary/30 text-primary-foreground px-1 py-0.5">
-                                {PHOTO_TAGS.find(pt => pt.id === t)?.label || t}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <button
-                        onClick={async (e) => { e.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
-                        className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+          {tab === 'evento' && renderPhotoGrid(eventPhotos, 'evento', fileRefEvento)}
+          {tab === 'estrutura' && renderPhotoGrid(structurePhotos, 'estrutura', fileRefEstrutura)}
 
           {tab === 'events' && (
             <div className="p-3">
