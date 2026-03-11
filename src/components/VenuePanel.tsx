@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
