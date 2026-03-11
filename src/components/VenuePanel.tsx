@@ -50,10 +50,9 @@ export default function VenuePanel() {
       const isVideo = file.type.startsWith('video/');
       
       if (isVideo) {
-        // Store video as Blob (much more efficient than base64)
-        // Fix MOV MIME type for browser compatibility
-        const mimeType = file.type === 'video/quicktime' ? 'video/mp4' : file.type;
-        const blob = new Blob([file], { type: mimeType });
+        // Store video as original Blob (preserves native format)
+        const blob = file;
+        const mimeType = file.type || 'video/mp4';
         
         // Generate a small thumbnail placeholder
         await addPhoto({
