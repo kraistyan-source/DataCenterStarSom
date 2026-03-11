@@ -183,6 +183,19 @@ export default function Sidebar() {
           {addingMarker ? 'Clique no mapa' : 'Adicionar'}
         </button>
         <button
+          onClick={() => setSettingHomeBase(!settingHomeBase)}
+          className={`flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-2 px-3 border transition-colors ${
+            settingHomeBase
+              ? 'bg-primary text-primary-foreground border-primary'
+              : homeBase
+                ? 'border-primary/50 text-primary hover:border-primary'
+                : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground'
+          }`}
+          title={homeBase ? 'Reposicionar empresa' : 'Definir local da empresa'}
+        >
+          <Home className="w-3 h-3" />
+        </button>
+        <button
           onClick={handlePresentation}
           className="flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-2 px-3 border border-border text-muted-foreground hover:text-foreground hover:border-secondary transition-colors"
           title="Modo Apresentação"
