@@ -85,9 +85,9 @@ export default function VenuePanel() {
         className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
       >
         <Camera className="w-3.5 h-3.5" />
-        {category === 'evento' ? 'Adicionar Fotos do Evento' : 'Adicionar Fotos da Estrutura'}
+        {category === 'evento' ? 'Adicionar Fotos/Vídeos do Evento' : 'Adicionar Fotos/Vídeos da Estrutura'}
       </button>
-      <input ref={fileRef} type="file" accept="image/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+      <input ref={fileRef} type="file" accept="image/*,video/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
 
       {category === 'estrutura' && (
         <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
