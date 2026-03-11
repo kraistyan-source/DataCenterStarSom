@@ -1,10 +1,11 @@
 import { useEffect, useState, useMemo } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap, Tooltip } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap, Tooltip, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useApp } from '@/contexts/AppContext';
 import { VENUE_TYPE_COLORS } from '@/lib/db';
 import type { Venue } from '@/lib/db';
+import { distanceKm } from '@/lib/distance';
 
 // Fix default marker icons
 delete (L.Icon.Default.prototype as any)._getIconUrl;
