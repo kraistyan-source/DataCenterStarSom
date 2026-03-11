@@ -25,8 +25,8 @@ export default {
         foreground: "hsl(var(--foreground))",
         surface: "hsl(var(--surface))",
         dimmed: "hsl(var(--dimmed))",
-        orchid: "hsl(var(--orchid))",
-        spotlight: "hsl(var(--spotlight))",
+        gold: "hsl(var(--gold))",
+        "gold-dim": "hsl(var(--gold-dim))",
         nocturne: "hsl(var(--nocturne))",
         primary: {
           DEFAULT: "hsl(var(--primary))",
