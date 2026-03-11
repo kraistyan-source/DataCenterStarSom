@@ -50,10 +50,9 @@ export default function VenuePanel() {
       const isVideo = file.type.startsWith('video/');
       
       if (isVideo) {
-        // Store video as Blob (much more efficient than base64)
-        // Fix MOV MIME type for browser compatibility
-        const mimeType = file.type === 'video/quicktime' ? 'video/mp4' : file.type;
-        const blob = new Blob([file], { type: mimeType });
+        // Store video as original Blob (preserves native format)
+        const blob = file;
+        const mimeType = file.type || 'video/mp4';
         
         // Generate a small thumbnail placeholder
         await addPhoto({
@@ -132,7 +131,9 @@ export default function VenuePanel() {
             <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
               {p.mediaType === 'video' ? (
                 <>
-                  <video src={mediaUrls[p.id] || p.data} className="w-full h-full object-cover" muted preload="metadata" />
+                  <video className="w-full h-full object-cover" muted preload="metadata">
+                    <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
+                  </video>
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
                       <Play className="w-5 h-5 text-primary-foreground ml-0.5" />

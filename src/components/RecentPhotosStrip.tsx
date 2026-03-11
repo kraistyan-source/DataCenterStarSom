@@ -47,7 +47,9 @@ export default function RecentPhotosStrip() {
               >
                 {photo.mediaType === 'video' ? (
                   <div className="relative w-14 h-14">
-                    <video src={mediaUrls[photo.id] || ''} className="w-full h-full object-cover border border-border hover:border-primary transition-colors" muted preload="metadata" />
+                    <video className="w-full h-full object-cover border border-border hover:border-primary transition-colors" muted preload="metadata">
+                      <source src={mediaUrls[photo.id] || ''} type={photo.mimeType || 'video/mp4'} />
+                    </video>
                     <Play className="absolute inset-0 m-auto w-4 h-4 text-primary-foreground drop-shadow" />
                   </div>
                 ) : (
