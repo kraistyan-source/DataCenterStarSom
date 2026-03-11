@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
@@ -45,10 +45,18 @@ export default function VenuePanel() {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
+      const isVideo = file.type.startsWith('video/');
       const reader = new FileReader();
       reader.onload = async (ev) => {
         const data = ev.target?.result as string;
-        await addPhoto({ venueId: venue.id, data, caption: '', tags: [], category });
+        await addPhoto({
+          venueId: venue.id,
+          data,
+          caption: '',
+          tags: [],
+          category,
+          mediaType: isVideo ? 'video' : 'photo',
+        });
         await refreshLocal();
       };
       reader.readAsDataURL(file);
@@ -77,9 +85,9 @@ export default function VenuePanel() {
         className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
       >
         <Camera className="w-3.5 h-3.5" />
-        {category === 'evento' ? 'Adicionar Fotos do Evento' : 'Adicionar Fotos da Estrutura'}
+        {category === 'evento' ? 'Adicionar Fotos/Vídeos do Evento' : 'Adicionar Fotos/Vídeos da Estrutura'}
       </button>
-      <input ref={fileRef} type="file" accept="image/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+      <input ref={fileRef} type="file" accept="image/*,video/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
 
       {category === 'estrutura' && (
         <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
@@ -98,7 +106,18 @@ export default function VenuePanel() {
         <div className="grid grid-cols-2 gap-1">
           {photoList.map((p, i) => (
             <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
-              <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+              {p.mediaType === 'video' ? (
+                <>
+                  <video src={p.data} className="w-full h-full object-cover" muted preload="metadata" />
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
+                      <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+              )}
               <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
                 {p.tags.length > 0 && (
                   <div className="flex flex-wrap gap-0.5">

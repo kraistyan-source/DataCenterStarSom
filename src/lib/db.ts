@@ -43,13 +43,16 @@ export const EVENT_TYPES = [
 ] as const;
 
 export type PhotoCategory = 'evento' | 'estrutura';
+export type MediaType = 'photo' | 'video';
 
 export interface VenuePhoto {
   id: string;
   venueId: string;
   eventId?: string;
   category: PhotoCategory;
-  data: string; // base64
+  data: string; // base64 for photos, blob URL placeholder for videos
+  mediaType?: MediaType; // defaults to 'photo' for backwards compat
+  videoBlob?: Blob; // stored separately for videos
   caption: string;
   tags: string[];
   createdAt: string;
