@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useMediaUrl } from '@/hooks/use-media-url';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FullscreenViewer() {
@@ -26,6 +27,7 @@ export default function FullscreenViewer() {
   if (fullscreenPhotoIndex === null || fullscreenPhotos.length === 0) return null;
 
   const photo = fullscreenPhotos[fullscreenPhotoIndex];
+  const mediaUrl = useMediaUrl(photo ?? null);
   if (!photo) return null;
 
   return (
@@ -38,7 +40,7 @@ export default function FullscreenViewer() {
     >
       {photo.mediaType === 'video' ? (
         <video
-          src={photo.data}
+          src={mediaUrl}
           controls
           autoPlay
           className="max-w-[90vw] max-h-[90vh] object-contain"
@@ -46,7 +48,7 @@ export default function FullscreenViewer() {
         />
       ) : (
         <img
-          src={photo.data}
+          src={mediaUrl}
           alt={photo.caption || 'Foto'}
           className="max-w-[90vw] max-h-[90vh] object-contain"
           onClick={e => e.stopPropagation()}

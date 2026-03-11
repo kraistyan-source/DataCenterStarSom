@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
   getPhotosByVenue, getEventsByVenue,
@@ -33,6 +34,7 @@ export default function VenuePanel() {
 
   const eventPhotos = photos.filter(p => p.category === 'evento' || !p.category);
   const structurePhotos = photos.filter(p => p.category === 'estrutura');
+  const mediaUrls = useMediaUrls(photos);
 
   const refreshLocal = async () => {
     const [p, e] = await Promise.all([getPhotosByVenue(venue.id), getEventsByVenue(venue.id)]);
@@ -46,20 +48,42 @@ export default function VenuePanel() {
     if (!files) return;
     for (const file of Array.from(files)) {
       const isVideo = file.type.startsWith('video/');
-      const reader = new FileReader();
-      reader.onload = async (ev) => {
-        const data = ev.target?.result as string;
+      
+      if (isVideo) {
+        // Store video as Blob (much more efficient than base64)
+        // Fix MOV MIME type for browser compatibility
+        const mimeType = file.type === 'video/quicktime' ? 'video/mp4' : file.type;
+        const blob = new Blob([file], { type: mimeType });
+        
+        // Generate a small thumbnail placeholder
         await addPhoto({
           venueId: venue.id,
-          data,
+          data: '', // no base64 for videos
           caption: '',
           tags: [],
           category,
-          mediaType: isVideo ? 'video' : 'photo',
+          mediaType: 'video',
+          blob,
+          mimeType,
         });
         await refreshLocal();
-      };
-      reader.readAsDataURL(file);
+      } else {
+        // Photos: keep base64 (they're small)
+        const reader = new FileReader();
+        reader.onload = async (ev) => {
+          const data = ev.target?.result as string;
+          await addPhoto({
+            venueId: venue.id,
+            data,
+            caption: '',
+            tags: [],
+            category,
+            mediaType: 'photo',
+          });
+          await refreshLocal();
+        };
+        reader.readAsDataURL(file);
+      }
     }
     e.target.value = '';
   };
@@ -78,7 +102,7 @@ export default function VenuePanel() {
     await refresh();
   };
 
-  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>) => (
+  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>, mediaUrls: Record<string, string>) => (
     <div className="p-3">
       <button
         onClick={() => fileRef.current?.click()}
@@ -108,7 +132,7 @@ export default function VenuePanel() {
             <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
               {p.mediaType === 'video' ? (
                 <>
-                  <video src={p.data} className="w-full h-full object-cover" muted preload="metadata" />
+                  <video src={mediaUrls[p.id] || p.data} className="w-full h-full object-cover" muted preload="metadata" />
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
                       <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
@@ -116,7 +140,7 @@ export default function VenuePanel() {
                   </div>
                 </>
               ) : (
-                <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+                <img src={mediaUrls[p.id] || p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
               )}
               <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
                 {p.tags.length > 0 && (
@@ -187,8 +211,8 @@ export default function VenuePanel() {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {tab === 'evento' && renderPhotoGrid(eventPhotos, 'evento', fileRefEvento)}
-          {tab === 'estrutura' && renderPhotoGrid(structurePhotos, 'estrutura', fileRefEstrutura)}
+          {tab === 'evento' && renderPhotoGrid(eventPhotos, 'evento', fileRefEvento, mediaUrls)}
+          {tab === 'estrutura' && renderPhotoGrid(structurePhotos, 'estrutura', fileRefEstrutura, mediaUrls)}
 
           {tab === 'events' && (
             <div className="p-3">
