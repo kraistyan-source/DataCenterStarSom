@@ -211,8 +211,8 @@ export default function VenuePanel() {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto">
-          {tab === 'evento' && renderPhotoGrid(eventPhotos, 'evento', fileRefEvento)}
-          {tab === 'estrutura' && renderPhotoGrid(structurePhotos, 'estrutura', fileRefEstrutura)}
+          {tab === 'evento' && renderPhotoGrid(eventPhotos, 'evento', fileRefEvento, mediaUrls)}
+          {tab === 'estrutura' && renderPhotoGrid(structurePhotos, 'estrutura', fileRefEstrutura, mediaUrls)}
 
           {tab === 'events' && (
             <div className="p-3">
