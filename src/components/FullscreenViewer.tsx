@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useMediaUrl } from '@/hooks/use-media-url';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function FullscreenViewer() {
