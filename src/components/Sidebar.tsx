@@ -12,6 +12,7 @@ export default function Sidebar() {
     setPresentationMode, setPresentationCity,
     addingMarker, setAddingMarker,
     refresh, photos, events,
+    homeBase, settingHomeBase, setSettingHomeBase,
   } = useApp();
 
   const [importing, setImporting] = useState(false);
