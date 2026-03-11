@@ -7,12 +7,13 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function FullscreenViewer() {
   const { fullscreenPhotoIndex, fullscreenPhotos, closeFullscreen } = useApp();
 
+  const photo = fullscreenPhotoIndex !== null ? fullscreenPhotos[fullscreenPhotoIndex] ?? null : null;
+  const mediaUrl = useMediaUrl(photo);
+
   const navigate = useCallback((dir: number) => {
     if (fullscreenPhotoIndex === null) return;
     const next = fullscreenPhotoIndex + dir;
     if (next >= 0 && next < fullscreenPhotos.length) {
-      // We need to update via context - re-open
-      // Since we can't partially update, we'll handle internally
     }
   }, [fullscreenPhotoIndex, fullscreenPhotos]);
 
@@ -24,11 +25,7 @@ export default function FullscreenViewer() {
     return () => window.removeEventListener('keydown', handler);
   }, [closeFullscreen]);
 
-  if (fullscreenPhotoIndex === null || fullscreenPhotos.length === 0) return null;
-
-  const photo = fullscreenPhotos[fullscreenPhotoIndex];
-  const mediaUrl = useMediaUrl(photo ?? null);
-  if (!photo) return null;
+  if (fullscreenPhotoIndex === null || !photo) return null;
 
   return (
     <motion.div
