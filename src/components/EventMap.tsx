@@ -102,7 +102,7 @@ export default function EventMap({ onMapClick }: EventMapProps) {
         <Marker
           key={venue.id}
           position={[venue.lat, venue.lng]}
-          icon={selectedVenueId === venue.id ? selectedIcon : orchidIcon}
+          icon={selectedVenueId === venue.id ? selectedIcon : markerIcon}
           eventHandlers={{
             click: () => setSelectedVenueId(venue.id),
           }}
