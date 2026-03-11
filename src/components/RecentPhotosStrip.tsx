@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Camera, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Camera, X, ChevronLeft, Play } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 
 export default function RecentPhotosStrip() {
