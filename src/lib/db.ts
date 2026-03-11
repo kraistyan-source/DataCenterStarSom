@@ -19,8 +19,22 @@ export const PHOTO_TAGS: PhotoTag[] = [
 
 export const VENUE_TYPES = [
   'Salão', 'Clube', 'Igreja', 'Área Externa', 'Restaurante',
-  'Hotel', 'Chácara', 'Espaço de Eventos', 'Outro'
+  'Hotel', 'Chácara', 'Espaço de Eventos', 'Trilha', 'Outro'
 ] as const;
+
+// Colors per venue type (HSL values)
+export const VENUE_TYPE_COLORS: Record<string, string> = {
+  'Salão': '48 96% 53%',       // gold
+  'Clube': '280 70% 55%',      // purple
+  'Igreja': '200 80% 55%',     // blue
+  'Área Externa': '140 60% 45%', // green
+  'Restaurante': '20 85% 55%', // orange
+  'Hotel': '330 70% 55%',      // pink
+  'Chácara': '90 55% 45%',     // lime
+  'Espaço de Eventos': '48 96% 53%', // gold
+  'Trilha': '160 70% 40%',     // teal
+  'Outro': '0 0% 60%',         // grey
+};
 
 export const EVENT_TYPES = [
   'Casamento', 'Aniversário', 'Corporativo', 'Formatura',
