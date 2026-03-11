@@ -23,6 +23,10 @@ interface AppState {
   refresh: () => Promise<void>;
   addingMarker: boolean;
   setAddingMarker: (v: boolean) => void;
+  homeBase: HomeBase | null;
+  setHomeBase: (hb: HomeBase | null) => void;
+  settingHomeBase: boolean;
+  setSettingHomeBase: (v: boolean) => void;
 }
 
 const AppContext = createContext<AppState | null>(null);
