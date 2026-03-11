@@ -131,7 +131,7 @@ export default function VenuePanel() {
             <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
               {p.mediaType === 'video' ? (
                 <>
-                  <video src={p.data} className="w-full h-full object-cover" muted preload="metadata" />
+                  <video src={mediaUrls[p.id] || p.data} className="w-full h-full object-cover" muted preload="metadata" />
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
                       <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
@@ -139,7 +139,7 @@ export default function VenuePanel() {
                   </div>
                 </>
               ) : (
-                <img src={p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+                <img src={mediaUrls[p.id] || p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
               )}
               <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
                 {p.tags.length > 0 && (
