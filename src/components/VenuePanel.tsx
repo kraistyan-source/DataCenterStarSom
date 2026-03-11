@@ -285,7 +285,7 @@ function InfoRow({ label, value }: { label: string; value: string }) {
 function AddEventForm({ venueId, onClose, onSave }: { venueId: string; onClose: () => void; onSave: () => void }) {
   const [name, setName] = useState('');
   const [date, setDate] = useState('');
-  const [eventType, setEventType] = useState(EVENT_TYPES[0]);
+  const [eventType, setEventType] = useState<string>(EVENT_TYPES[0]);
   const [clientType, setClientType] = useState('');
   const [notes, setNotes] = useState('');
 

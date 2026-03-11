@@ -14,7 +14,7 @@ export default function AddVenueDialog({ lat, lng, onClose }: AddVenueDialogProp
   const [name, setName] = useState('');
   const [city, setCity] = useState('');
   const [address, setAddress] = useState('');
-  const [venueType, setVenueType] = useState(VENUE_TYPES[0]);
+  const [venueType, setVenueType] = useState<string>(VENUE_TYPES[0]);
   const [capacity, setCapacity] = useState('');
   const [notes, setNotes] = useState('');
 
