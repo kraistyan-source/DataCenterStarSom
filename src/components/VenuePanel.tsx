@@ -34,6 +34,7 @@ export default function VenuePanel() {
 
   const eventPhotos = photos.filter(p => p.category === 'evento' || !p.category);
   const structurePhotos = photos.filter(p => p.category === 'estrutura');
+  const mediaUrls = useMediaUrls(photos);
 
   const refreshLocal = async () => {
     const [p, e] = await Promise.all([getPhotosByVenue(venue.id), getEventsByVenue(venue.id)]);
