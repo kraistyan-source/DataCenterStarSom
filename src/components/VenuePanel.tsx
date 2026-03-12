@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
@@ -8,6 +8,8 @@ import {
   addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
+import { needsConversion, convertToMp4 } from '@/lib/video-converter';
+import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VenuePanel() {
