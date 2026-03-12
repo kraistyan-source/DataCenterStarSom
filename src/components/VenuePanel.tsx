@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2 } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
@@ -8,6 +8,8 @@ import {
   addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
+import { needsConversion, convertToMp4 } from '@/lib/video-converter';
+import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VenuePanel() {
@@ -21,6 +23,8 @@ export default function VenuePanel() {
   const [showAddEvent, setShowAddEvent] = useState(false);
   const fileRefEvento = useRef<HTMLInputElement>(null);
   const fileRefEstrutura = useRef<HTMLInputElement>(null);
+  const [converting, setConverting] = useState(false);
+  const [convertProgress, setConvertProgress] = useState(0);
 
   useEffect(() => {
     if (!venue) return;
@@ -47,17 +51,31 @@ export default function VenuePanel() {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
-      const isVideo = file.type.startsWith('video/');
+      const isVideo = file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov');
       
       if (isVideo) {
-        // Store video as original Blob (preserves native format)
-        const blob = file;
-        const mimeType = file.type || 'video/mp4';
-        
-        // Generate a small thumbnail placeholder
+        let blob: Blob = file;
+        let mimeType = file.type || 'video/mp4';
+
+        // Convert MOV / incompatible formats to MP4
+        if (needsConversion(file)) {
+          try {
+            setConverting(true);
+            setConvertProgress(0);
+            blob = await convertToMp4(file, (ratio) => setConvertProgress(Math.round(ratio * 100)));
+            mimeType = 'video/mp4';
+          } catch (err) {
+            console.error('Conversion failed, storing original:', err);
+            // Fallback: store original
+          } finally {
+            setConverting(false);
+            setConvertProgress(0);
+          }
+        }
+
         await addPhoto({
           venueId: venue.id,
-          data: '', // no base64 for videos
+          data: '',
           caption: '',
           tags: [],
           category,
@@ -183,6 +201,16 @@ export default function VenuePanel() {
         transition={{ type: 'tween', duration: 0.3 }}
         className="absolute right-0 top-0 h-full w-[400px] bg-card border-l border-border z-[1000] flex flex-col overflow-hidden"
       >
+        {/* Conversion overlay */}
+        {converting && (
+          <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
+            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+            <p className="text-sm font-medium text-foreground">Convertendo vídeo para MP4…</p>
+            <Progress value={convertProgress} className="w-48 h-2" />
+            <p className="text-xs text-muted-foreground">{convertProgress}%</p>
+          </div>
+        )}
+
         {/* Header */}
         <div className="p-4 border-b border-border flex items-start justify-between">
           <div className="flex-1 min-w-0">
