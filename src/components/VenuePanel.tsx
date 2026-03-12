@@ -51,17 +51,31 @@ export default function VenuePanel() {
     const files = e.target.files;
     if (!files) return;
     for (const file of Array.from(files)) {
-      const isVideo = file.type.startsWith('video/');
+      const isVideo = file.type.startsWith('video/') || file.name.toLowerCase().endsWith('.mov');
       
       if (isVideo) {
-        // Store video as original Blob (preserves native format)
-        const blob = file;
-        const mimeType = file.type || 'video/mp4';
-        
-        // Generate a small thumbnail placeholder
+        let blob: Blob = file;
+        let mimeType = file.type || 'video/mp4';
+
+        // Convert MOV / incompatible formats to MP4
+        if (needsConversion(file)) {
+          try {
+            setConverting(true);
+            setConvertProgress(0);
+            blob = await convertToMp4(file, (ratio) => setConvertProgress(Math.round(ratio * 100)));
+            mimeType = 'video/mp4';
+          } catch (err) {
+            console.error('Conversion failed, storing original:', err);
+            // Fallback: store original
+          } finally {
+            setConverting(false);
+            setConvertProgress(0);
+          }
+        }
+
         await addPhoto({
           venueId: venue.id,
-          data: '', // no base64 for videos
+          data: '',
           caption: '',
           tags: [],
           category,
