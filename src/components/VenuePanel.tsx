@@ -9,6 +9,7 @@ import {
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
+import { extractVideoThumbnail } from '@/lib/video-thumbnail';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
