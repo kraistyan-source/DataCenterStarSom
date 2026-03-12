@@ -52,12 +52,16 @@ export async function convertToMp4(
   await ff.writeFile(inputName, await fetchFile(file));
   await ff.exec(['-i', inputName, '-c:v', 'libx264', '-preset', 'fast', '-crf', '28', '-c:a', 'aac', '-movflags', '+faststart', outputName]);
 
-  const data = (await ff.readFile(outputName)) as Uint8Array;
+  const rawData = await ff.readFile(outputName);
   // Cleanup
   await ff.deleteFile(inputName);
   await ff.deleteFile(outputName);
 
-  return new Blob([data], { type: 'video/mp4' });
+  // Copy to a new ArrayBuffer to satisfy strict TS typing
+  const bytes = rawData as Uint8Array;
+  const copy = new Uint8Array(bytes.length);
+  copy.set(bytes);
+  return new Blob([copy], { type: 'video/mp4' });
 }
 
 function getExtension(filename: string): string {
