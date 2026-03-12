@@ -9,6 +9,7 @@ import {
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
+import { extractVideoThumbnail } from '@/lib/video-thumbnail';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -73,6 +74,14 @@ export default function VenuePanel() {
           }
         }
 
+        // Extract thumbnail
+        let thumbnail = '';
+        try {
+          thumbnail = await extractVideoThumbnail(blob);
+        } catch (err) {
+          console.warn('Thumbnail extraction failed:', err);
+        }
+
         await addPhoto({
           venueId: venue.id,
           data: '',
@@ -82,6 +91,7 @@ export default function VenuePanel() {
           mediaType: 'video',
           blob,
           mimeType,
+          thumbnail,
         });
         await refreshLocal();
       } else {
@@ -149,9 +159,13 @@ export default function VenuePanel() {
             <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
               {p.mediaType === 'video' ? (
                 <>
-                  <video className="w-full h-full object-cover" muted preload="metadata">
-                    <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
-                  </video>
+                  {p.thumbnail ? (
+                    <img src={p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
+                  ) : (
+                    <video className="w-full h-full object-cover" muted preload="metadata">
+                      <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
+                    </video>
+                  )}
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
                       <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
