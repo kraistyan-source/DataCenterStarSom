@@ -11,10 +11,6 @@ export default defineConfig(({ mode }) => ({
     hmr: {
       overlay: false,
     },
-    headers: {
-      'Cross-Origin-Opener-Policy': 'same-origin',
-      'Cross-Origin-Embedder-Policy': 'require-corp',
-    },
   },
   plugins: [
     react(),
@@ -56,6 +52,9 @@ export default defineConfig(({ mode }) => ({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
-    dedupe: ["react", "react-dom", "react/jsx-runtime"],
+    dedupe: ["react", "react-dom", "react/jsx-runtime", "@tanstack/react-query"],
+  },
+  optimizeDeps: {
+    include: ["@tanstack/react-query"],
   },
 }));
