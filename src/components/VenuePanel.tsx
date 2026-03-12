@@ -74,6 +74,14 @@ export default function VenuePanel() {
           }
         }
 
+        // Extract thumbnail
+        let thumbnail = '';
+        try {
+          thumbnail = await extractVideoThumbnail(blob);
+        } catch (err) {
+          console.warn('Thumbnail extraction failed:', err);
+        }
+
         await addPhoto({
           venueId: venue.id,
           data: '',
@@ -83,6 +91,7 @@ export default function VenuePanel() {
           mediaType: 'video',
           blob,
           mimeType,
+          thumbnail,
         });
         await refreshLocal();
       } else {
