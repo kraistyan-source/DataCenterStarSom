@@ -54,6 +54,7 @@ export interface VenuePhoto {
   mediaType?: MediaType; // defaults to 'photo' for backwards compat
   blob?: Blob; // raw file blob for videos (much more efficient than base64)
   mimeType?: string; // e.g. 'video/mp4'
+  thumbnail?: string; // base64 jpeg thumbnail for videos
   caption: string;
   tags: string[];
   createdAt: string;
