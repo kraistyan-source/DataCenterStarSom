@@ -23,6 +23,8 @@ export default function VenuePanel() {
   const [showAddEvent, setShowAddEvent] = useState(false);
   const fileRefEvento = useRef<HTMLInputElement>(null);
   const fileRefEstrutura = useRef<HTMLInputElement>(null);
+  const [converting, setConverting] = useState(false);
+  const [convertProgress, setConvertProgress] = useState(0);
 
   useEffect(() => {
     if (!venue) return;
