@@ -9,6 +9,7 @@ import {
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
+import heic2any from 'heic2any';
 import { extractVideoThumbnail } from '@/lib/video-thumbnail';
 import { getPinnedPhotos, togglePinPhoto, type PinnedPhoto } from '@/lib/store';
 import { Progress } from '@/components/ui/progress';
