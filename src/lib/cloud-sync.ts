@@ -27,6 +27,7 @@ export async function uploadToCloud(
 
   try {
     report('uploading', 'Lendo dados locais…');
+    const userId = await getCurrentUserId();
     const [venues, photos, events] = await Promise.all([
       getAllVenues(), getAllPhotos(), getAllEvents()
     ]);
