@@ -22,7 +22,16 @@ export default function Sidebar() {
   const cities = [...new Set(venues.map(v => v.city))].sort();
   const eventTypes = [...new Set(events.map(e => e.eventType))].filter(Boolean).sort();
 
+  // Compute venue IDs from the last N events (same logic as map)
+  const lastNEventVenueIds = useMemo(() => {
+    if (!filters.lastNEvents) return null;
+    const sorted = [...events].sort((a, b) => new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime());
+    const lastN = sorted.slice(0, filters.lastNEvents);
+    return new Set(lastN.map(e => e.venueId));
+  }, [events, filters.lastNEvents]);
+
   const filteredVenues = venues.filter(v => {
+    if (lastNEventVenueIds && !lastNEventVenueIds.has(v.id)) return false;
     if (filters.city && v.city !== filters.city) return false;
     if (filters.venueType && v.venueType !== filters.venueType) return false;
     if (filters.search) {
