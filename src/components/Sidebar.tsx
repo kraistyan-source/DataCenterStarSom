@@ -22,13 +22,21 @@ export default function Sidebar() {
   const cities = [...new Set(venues.map(v => v.city))].sort();
   const eventTypes = [...new Set(events.map(e => e.eventType))].filter(Boolean).sort();
 
-  // Compute venue IDs from the last N events (same logic as map)
+  // Compute venue IDs from the last N activity (photos or events)
   const lastNEventVenueIds = useMemo(() => {
     if (!filters.lastNEvents) return null;
-    const sorted = [...events].sort((a, b) => new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime());
-    const lastN = sorted.slice(0, filters.lastNEvents);
-    return new Set(lastN.map(e => e.venueId));
-  }, [events, filters.lastNEvents]);
+    const venueLatest: Record<string, number> = {};
+    for (const p of photos) {
+      const t = new Date(p.createdAt).getTime();
+      if (!venueLatest[p.venueId] || t > venueLatest[p.venueId]) venueLatest[p.venueId] = t;
+    }
+    for (const e of events) {
+      const t = new Date(e.date || e.createdAt).getTime();
+      if (!venueLatest[e.venueId] || t > venueLatest[e.venueId]) venueLatest[e.venueId] = t;
+    }
+    const sorted = Object.entries(venueLatest).sort((a, b) => b[1] - a[1]);
+    return new Set(sorted.slice(0, filters.lastNEvents).map(([id]) => id));
+  }, [events, photos, filters.lastNEvents]);
 
   const filteredVenues = venues.filter(v => {
     if (lastNEventVenueIds && !lastNEventVenueIds.has(v.id)) return false;
