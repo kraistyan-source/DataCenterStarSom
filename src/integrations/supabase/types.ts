@@ -23,6 +23,7 @@ export type Database = {
           id: string
           name: string
           notes: string
+          user_id: string | null
           venue_id: string
         }
         Insert: {
@@ -33,6 +34,7 @@ export type Database = {
           id?: string
           name: string
           notes?: string
+          user_id?: string | null
           venue_id: string
         }
         Update: {
@@ -43,6 +45,7 @@ export type Database = {
           id?: string
           name?: string
           notes?: string
+          user_id?: string | null
           venue_id?: string
         }
         Relationships: [
@@ -67,6 +70,7 @@ export type Database = {
           storage_path: string | null
           tags: string[]
           thumbnail_path: string | null
+          user_id: string | null
           venue_id: string
         }
         Insert: {
@@ -80,6 +84,7 @@ export type Database = {
           storage_path?: string | null
           tags?: string[]
           thumbnail_path?: string | null
+          user_id?: string | null
           venue_id: string
         }
         Update: {
@@ -93,6 +98,7 @@ export type Database = {
           storage_path?: string | null
           tags?: string[]
           thumbnail_path?: string | null
+          user_id?: string | null
           venue_id?: string
         }
         Relationships: [
@@ -123,6 +129,7 @@ export type Database = {
           lng: number
           name: string
           notes: string
+          user_id: string | null
           venue_type: string
         }
         Insert: {
@@ -135,6 +142,7 @@ export type Database = {
           lng: number
           name: string
           notes?: string
+          user_id?: string | null
           venue_type?: string
         }
         Update: {
@@ -147,6 +155,7 @@ export type Database = {
           lng?: number
           name?: string
           notes?: string
+          user_id?: string | null
           venue_type?: string
         }
         Relationships: []

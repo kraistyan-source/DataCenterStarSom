@@ -3,6 +3,12 @@ import { getAllVenues, getAllPhotos, getAllEvents, getDB } from './db';
 import type { Venue, VenuePhoto, VenueEvent } from './db';
 import { v4 as uuidv4 } from 'uuid';
 
+async function getCurrentUserId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Usuário não autenticado');
+  return user.id;
+}
+
 export type SyncStatus = 'idle' | 'uploading' | 'downloading' | 'error' | 'done';
 
 export interface SyncProgress {
@@ -21,6 +27,7 @@ export async function uploadToCloud(
 
   try {
     report('uploading', 'Lendo dados locais…');
+    const userId = await getCurrentUserId();
     const [venues, photos, events] = await Promise.all([
       getAllVenues(), getAllPhotos(), getAllEvents()
     ]);
@@ -33,6 +40,7 @@ export async function uploadToCloud(
     for (const v of venues) {
       await supabase.from('venues').upsert({
         id: v.id,
+        user_id: userId,
         name: v.name,
         city: v.city,
         address: v.address,
@@ -52,6 +60,7 @@ export async function uploadToCloud(
     for (const e of events) {
       await supabase.from('events').upsert({
         id: e.id,
+        user_id: userId,
         venue_id: e.venueId,
         name: e.name,
         date: e.date,
@@ -103,6 +112,7 @@ export async function uploadToCloud(
 
       await supabase.from('photos').upsert({
         id: p.id,
+        user_id: userId,
         venue_id: p.venueId,
         event_id: p.eventId || null,
         category: p.category,
