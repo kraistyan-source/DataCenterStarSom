@@ -27,6 +27,12 @@ export default function VenuePanel() {
   const fileRefEstrutura = useRef<HTMLInputElement>(null);
   const [converting, setConverting] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
+  const [pinnedPhotos, setPinnedPhotos] = useState<PinnedPhoto[]>(getPinnedPhotos());
+
+  const handleTogglePin = useCallback((photoId: string) => {
+    const updated = togglePinPhoto(photoId, venue?.id || '');
+    setPinnedPhotos(updated);
+  }, [venue?.id]);
 
   useEffect(() => {
     if (!venue) return;
