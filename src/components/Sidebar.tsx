@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
-import { Search, MapPin, Download, Upload, Presentation, Plus, Home, Clock, Pin, Cloud } from 'lucide-react';
+import { Search, MapPin, Download, Upload, Presentation, Plus, Home, Clock, Pin, Cloud, LogOut } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { VENUE_TYPES, EVENT_TYPES } from '@/lib/db';
 import { exportDatabase, importDatabase } from '@/lib/db';
 import { distanceKm } from '@/lib/distance';
