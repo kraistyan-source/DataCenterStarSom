@@ -1,29 +1,24 @@
-import { useCallback, useEffect } from 'react';
+import { useEffect } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useMediaUrl } from '@/hooks/use-media-url';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export default function FullscreenViewer() {
-  const { fullscreenPhotoIndex, fullscreenPhotos, closeFullscreen } = useApp();
+  const { fullscreenPhotoIndex, fullscreenPhotos, closeFullscreen, navigateFullscreen } = useApp();
 
   const photo = fullscreenPhotoIndex !== null ? fullscreenPhotos[fullscreenPhotoIndex] ?? null : null;
   const mediaUrl = useMediaUrl(photo);
 
-  const navigate = useCallback((dir: number) => {
-    if (fullscreenPhotoIndex === null) return;
-    const next = fullscreenPhotoIndex + dir;
-    if (next >= 0 && next < fullscreenPhotos.length) {
-    }
-  }, [fullscreenPhotoIndex, fullscreenPhotos]);
-
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') closeFullscreen();
+      if (e.key === 'ArrowLeft') navigateFullscreen(-1);
+      if (e.key === 'ArrowRight') navigateFullscreen(1);
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [closeFullscreen]);
+  }, [closeFullscreen, navigateFullscreen]);
 
   if (fullscreenPhotoIndex === null || !photo) return null;
 
@@ -65,7 +60,7 @@ export default function FullscreenViewer() {
 
       {fullscreenPhotoIndex > 0 && (
         <button
-          onClick={e => { e.stopPropagation(); /* handled via context */ }}
+          onClick={e => { e.stopPropagation(); navigateFullscreen(-1); }}
           className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         >
           <ChevronLeft className="w-8 h-8" />
@@ -74,7 +69,7 @@ export default function FullscreenViewer() {
 
       {fullscreenPhotoIndex < fullscreenPhotos.length - 1 && (
         <button
-          onClick={e => { e.stopPropagation(); }}
+          onClick={e => { e.stopPropagation(); navigateFullscreen(1); }}
           className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
         >
           <ChevronRight className="w-8 h-8" />
