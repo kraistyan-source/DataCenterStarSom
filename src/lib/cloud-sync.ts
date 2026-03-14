@@ -3,6 +3,12 @@ import { getAllVenues, getAllPhotos, getAllEvents, getDB } from './db';
 import type { Venue, VenuePhoto, VenueEvent } from './db';
 import { v4 as uuidv4 } from 'uuid';
 
+async function getCurrentUserId(): Promise<string> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Usuário não autenticado');
+  return user.id;
+}
+
 export type SyncStatus = 'idle' | 'uploading' | 'downloading' | 'error' | 'done';
 
 export interface SyncProgress {
