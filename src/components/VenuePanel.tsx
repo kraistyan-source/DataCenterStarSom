@@ -275,6 +275,13 @@ export default function VenuePanel() {
         transition={{ type: 'tween' as const, duration: 0.3 }}
         className={panelClasses}
       >
+        {/* Mobile drag handle */}
+        {isMobile && (
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </div>
+        )}
+
         {/* Conversion overlay */}
         {converting && (
           <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">
