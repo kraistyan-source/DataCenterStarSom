@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2, Pin } from 'lucide-react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2, Pin, ArrowRightLeft } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
   getPhotosByVenue, getEventsByVenue,
-  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue,
+  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue, updatePhotoCategory,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
@@ -201,6 +201,18 @@ export default function VenuePanel() {
                 title={pinnedPhotos.some(pp => pp.photoId === p.id) ? 'Remover destaque' : 'Fixar como destaque'}
               >
                 <Pin className="w-3 h-3" />
+              </button>
+              <button
+                onClick={async (ev) => {
+                  ev.stopPropagation();
+                  const newCat = category === 'evento' ? 'estrutura' : 'evento';
+                  await updatePhotoCategory(p.id, newCat);
+                  await refreshLocal();
+                }}
+                className="absolute top-1 left-7 w-5 h-5 bg-muted/80 text-muted-foreground hover:text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                title={category === 'evento' ? 'Mover para Estrutura' : 'Mover para Evento'}
+              >
+                <ArrowRightLeft className="w-3 h-3" />
               </button>
               <button
                 onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}

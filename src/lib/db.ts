@@ -178,6 +178,15 @@ export async function deletePhoto(id: string): Promise<void> {
   await db.delete('photos', id);
 }
 
+export async function updatePhotoCategory(id: string, category: PhotoCategory): Promise<void> {
+  const db = await getDB();
+  const photo = await db.get('photos', id);
+  if (photo) {
+    photo.category = category;
+    await db.put('photos', photo);
+  }
+}
+
 // Event CRUD
 export async function getEventsByVenue(venueId: string): Promise<VenueEvent[]> {
   const db = await getDB();
