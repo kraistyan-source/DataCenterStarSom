@@ -46,11 +46,21 @@ export default function VenuePanel() {
     });
   }, [venue, selectedVenueId]);
 
-  if (!venue) return null;
-
-  const eventPhotos = photos.filter(p => p.category === 'evento' || !p.category);
-  const structurePhotos = photos.filter(p => p.category === 'estrutura');
   const mediaUrls = useMediaUrls(photos);
+
+  const eventPhotos = useMemo(() => photos.filter(p => p.category === 'evento' || !p.category), [photos]);
+  const structurePhotos = useMemo(() => photos.filter(p => p.category === 'estrutura'), [photos]);
+
+  // Get unique upload dates for current photos
+  const uploadDates = useMemo(() => {
+    const dates = new Set<string>();
+    photos.forEach(p => {
+      dates.add(new Date(p.createdAt).toISOString().slice(0, 10));
+    });
+    return [...dates].sort((a, b) => b.localeCompare(a));
+  }, [photos]);
+
+  if (!venue) return null;
 
   const refreshLocal = async () => {
     const [p, e] = await Promise.all([getPhotosByVenue(venue.id), getEventsByVenue(venue.id)]);
