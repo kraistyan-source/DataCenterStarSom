@@ -175,15 +175,6 @@ export default function VenuePanel() {
     await refresh();
   };
 
-  // Get unique upload dates for current photos
-  const uploadDates = useMemo(() => {
-    const dates = new Set<string>();
-    photos.forEach(p => {
-      dates.add(new Date(p.createdAt).toISOString().slice(0, 10));
-    });
-    return [...dates].sort((a, b) => b.localeCompare(a));
-  }, [photos]);
-
   const filterByDate = (list: VenuePhoto[]) => {
     if (!dateFilter) return list;
     return list.filter(p => new Date(p.createdAt).toISOString().slice(0, 10) === dateFilter);
