@@ -112,6 +112,7 @@ export async function uploadToCloud(
 
       await supabase.from('photos').upsert({
         id: p.id,
+        user_id: userId,
         venue_id: p.venueId,
         event_id: p.eventId || null,
         category: p.category,
