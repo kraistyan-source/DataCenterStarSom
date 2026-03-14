@@ -92,6 +92,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setFullscreenPhotos([]);
   }, []);
 
+  const navigateFullscreen = useCallback((dir: number) => {
+    setFullscreenPhotoIndex(prev => {
+      if (prev === null) return null;
+      const next = prev + dir;
+      if (next < 0 || next >= fullscreenPhotos.length) return prev;
+      return next;
+    });
+  }, [fullscreenPhotos.length]);
+
   return (
     <AppContext.Provider value={{
       venues, photos, events,
