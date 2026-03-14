@@ -31,6 +31,7 @@ export default function VenuePanel() {
   const [converting, setConverting] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
   const [pinnedPhotos, setPinnedPhotos] = useState<PinnedPhoto[]>(getPinnedPhotos());
+  const [dateFilter, setDateFilter] = useState<string>(''); // YYYY-MM-DD or ''
 
   const handleTogglePin = useCallback((photoId: string) => {
     const updated = togglePinPhoto(photoId, venue?.id || '');
