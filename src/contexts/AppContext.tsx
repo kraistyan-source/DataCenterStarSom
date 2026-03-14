@@ -20,6 +20,7 @@ interface AppState {
   setPresentationCity: (city: string | null) => void;
   openFullscreen: (photos: VenuePhoto[], index: number) => void;
   closeFullscreen: () => void;
+  navigateFullscreen: (dir: number) => void;
   refresh: () => Promise<void>;
   addingMarker: boolean;
   setAddingMarker: (v: boolean) => void;
@@ -91,6 +92,15 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setFullscreenPhotos([]);
   }, []);
 
+  const navigateFullscreen = useCallback((dir: number) => {
+    setFullscreenPhotoIndex(prev => {
+      if (prev === null) return null;
+      const next = prev + dir;
+      if (next < 0 || next >= fullscreenPhotos.length) return prev;
+      return next;
+    });
+  }, [fullscreenPhotos.length]);
+
   return (
     <AppContext.Provider value={{
       venues, photos, events,
@@ -98,7 +108,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       filters, setFilters,
       presentationMode, setPresentationMode,
       presentationCity, setPresentationCity,
-      fullscreenPhotoIndex, fullscreenPhotos, openFullscreen, closeFullscreen,
+      fullscreenPhotoIndex, fullscreenPhotos, openFullscreen, closeFullscreen, navigateFullscreen,
       refresh,
       addingMarker, setAddingMarker,
       homeBase, setHomeBase, settingHomeBase, setSettingHomeBase,

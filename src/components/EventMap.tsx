@@ -1,4 +1,5 @@
 import { useEffect, useState, useMemo } from 'react';
+import { Clock } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap, Tooltip, Circle } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -150,7 +151,7 @@ interface EventMapProps {
 }
 
 export default function EventMap({ onMapClick }: EventMapProps) {
-  const { venues, events, selectedVenueId, setSelectedVenueId, filters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
+  const { venues, events, selectedVenueId, setSelectedVenueId, filters, setFilters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
 
   // Compute venue IDs from the last N events
@@ -194,44 +195,59 @@ export default function EventMap({ onMapClick }: EventMapProps) {
   const homeBaseIcon = useMemo(() => getHomeBaseIcon(), []);
 
   return (
-    <MapContainer
-      center={DEFAULT_CENTER}
-      zoom={DEFAULT_ZOOM}
-      className="w-full h-full"
-      zoomControl={true}
-      style={{ cursor: addingMarker || settingHomeBase ? 'crosshair' : 'grab' }}
-    >
-      <TileLayer
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-      />
-      <MapController />
-      <ZoomTracker onZoomChange={setZoom} />
-      <MapClickHandler onMapClick={onMapClick} />
-      {settingHomeBase && <HomeBaseClickHandler onSet={handleHomeBaseClick} />}
-      {homeBase && (
-        <Marker position={[homeBase.lat, homeBase.lng]} icon={homeBaseIcon}>
-          <Tooltip permanent direction="top" offset={[0, -14]} className="venue-label-tooltip homebase-tooltip">
-            🏠 {homeBase.name}
-          </Tooltip>
-          <Popup>
-            <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '12px' }}>
-              <strong>{homeBase.name}</strong><br />
-              <span style={{ color: '#9090A0' }}>Base da empresa</span>
-            </div>
-          </Popup>
-        </Marker>
-      )}
-      {filteredVenues.map(venue => (
-        <VenueMarker
-          key={venue.id}
-          venue={venue}
-          isSelected={selectedVenueId === venue.id}
-          showLabel={showLabels}
-          distanceText={getDistanceText(venue)}
-          onClick={() => setSelectedVenueId(venue.id)}
+    <div className="relative w-full h-full">
+      <MapContainer
+        center={DEFAULT_CENTER}
+        zoom={DEFAULT_ZOOM}
+        className="w-full h-full"
+        zoomControl={true}
+        style={{ cursor: addingMarker || settingHomeBase ? 'crosshair' : 'grab' }}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a>'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-      ))}
-    </MapContainer>
+        <MapController />
+        <ZoomTracker onZoomChange={setZoom} />
+        <MapClickHandler onMapClick={onMapClick} />
+        {settingHomeBase && <HomeBaseClickHandler onSet={handleHomeBaseClick} />}
+        {homeBase && (
+          <Marker position={[homeBase.lat, homeBase.lng]} icon={homeBaseIcon}>
+            <Tooltip permanent direction="top" offset={[0, -14]} className="venue-label-tooltip homebase-tooltip">
+              🏠 {homeBase.name}
+            </Tooltip>
+            <Popup>
+              <div style={{ fontFamily: 'Roboto Mono, monospace', fontSize: '12px' }}>
+                <strong>{homeBase.name}</strong><br />
+                <span style={{ color: '#9090A0' }}>Base da empresa</span>
+              </div>
+            </Popup>
+          </Marker>
+        )}
+        {filteredVenues.map(venue => (
+          <VenueMarker
+            key={venue.id}
+            venue={venue}
+            isSelected={selectedVenueId === venue.id}
+            showLabel={showLabels}
+            distanceText={getDistanceText(venue)}
+            onClick={() => setSelectedVenueId(venue.id)}
+          />
+        ))}
+      </MapContainer>
+
+      {/* Floating filter button */}
+      <button
+        onClick={() => setFilters({ lastNEvents: filters.lastNEvents === 5 ? null : 5 })}
+        className={`absolute bottom-4 left-4 z-[1000] flex items-center gap-1.5 px-3 py-2 text-[10px] uppercase tracking-widest border transition-colors shadow-lg ${
+          filters.lastNEvents === 5
+            ? 'bg-primary text-primary-foreground border-primary'
+            : 'bg-card/90 text-muted-foreground border-border hover:text-foreground hover:border-primary backdrop-blur-sm'
+        }`}
+      >
+        <Clock className="w-3.5 h-3.5" />
+        Últimos 5 eventos
+      </button>
+    </div>
   );
 }
