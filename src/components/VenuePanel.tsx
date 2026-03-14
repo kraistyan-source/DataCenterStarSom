@@ -5,7 +5,7 @@ import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
   getPhotosByVenue, getEventsByVenue,
-  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue,
+  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue, updatePhotoCategory,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
