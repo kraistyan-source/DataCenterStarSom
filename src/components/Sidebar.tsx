@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Search, MapPin, Download, Upload, Presentation, Plus, Home } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, MapPin, Download, Upload, Presentation, Plus, Home, Clock, Pin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { VENUE_TYPES, EVENT_TYPES } from '@/lib/db';
 import { exportDatabase, importDatabase } from '@/lib/db';
 import { distanceKm } from '@/lib/distance';
+import { getPinnedPhotos } from '@/lib/store';
 
 export default function Sidebar() {
   const {
@@ -21,7 +22,16 @@ export default function Sidebar() {
   const cities = [...new Set(venues.map(v => v.city))].sort();
   const eventTypes = [...new Set(events.map(e => e.eventType))].filter(Boolean).sort();
 
+  // Compute venue IDs from the last N events (same logic as map)
+  const lastNEventVenueIds = useMemo(() => {
+    if (!filters.lastNEvents) return null;
+    const sorted = [...events].sort((a, b) => new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime());
+    const lastN = sorted.slice(0, filters.lastNEvents);
+    return new Set(lastN.map(e => e.venueId));
+  }, [events, filters.lastNEvents]);
+
   const filteredVenues = venues.filter(v => {
+    if (lastNEventVenueIds && !lastNEventVenueIds.has(v.id)) return false;
     if (filters.city && v.city !== filters.city) return false;
     if (filters.venueType && v.venueType !== filters.venueType) return false;
     if (filters.search) {
@@ -168,7 +178,66 @@ export default function Sidebar() {
             ))}
           </div>
         </div>
+        {/* Last N Events filter */}
+        <div>
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Recentes</label>
+          <div className="flex flex-wrap gap-1">
+            <button
+              onClick={() => setFilters({ lastNEvents: null })}
+              className={`text-[10px] px-2 py-0.5 border transition-colors ${
+                !filters.lastNEvents ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setFilters({ lastNEvents: filters.lastNEvents === 5 ? null : 5 })}
+              className={`text-[10px] px-2 py-0.5 border transition-colors flex items-center gap-1 ${
+                filters.lastNEvents === 5 ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Clock className="w-3 h-3" />
+              Últimos 5
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Pinned Photos Section */}
+      {(() => {
+        const pinned = getPinnedPhotos();
+        if (pinned.length === 0) return null;
+        const pinnedPhotoObjects = pinned.map(p => photos.find(ph => ph.id === p.photoId)).filter(Boolean);
+        if (pinnedPhotoObjects.length === 0) return null;
+        return (
+          <div className="p-3 border-b border-border">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 block flex items-center gap-1">
+              <Pin className="w-3 h-3 text-primary" />
+              Destaques ({pinnedPhotoObjects.length}/3)
+            </label>
+            <div className="flex gap-1">
+              {pinnedPhotoObjects.map((p) => p && (
+                <div
+                  key={p.id}
+                  className="w-16 h-16 bg-muted overflow-hidden cursor-pointer border border-primary/40 hover:border-primary transition-colors"
+                  onClick={() => {
+                    const venue = venues.find(v => v.id === p.venueId);
+                    if (venue) setSelectedVenueId(venue.id);
+                  }}
+                >
+                  {p.thumbnail ? (
+                    <img src={p.thumbnail} alt="Destaque" className="w-full h-full object-cover" />
+                  ) : p.mediaType === 'video' ? (
+                    <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-[8px]">VID</div>
+                  ) : (
+                    <img src={p.data} alt="Destaque" className="w-full h-full object-cover" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Actions */}
       <div className="p-3 border-b border-border flex gap-2">

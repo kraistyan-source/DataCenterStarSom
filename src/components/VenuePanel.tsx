@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2 } from 'lucide-react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2, Pin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
@@ -10,6 +10,7 @@ import {
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
 import { extractVideoThumbnail } from '@/lib/video-thumbnail';
+import { getPinnedPhotos, togglePinPhoto, type PinnedPhoto } from '@/lib/store';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -26,6 +27,12 @@ export default function VenuePanel() {
   const fileRefEstrutura = useRef<HTMLInputElement>(null);
   const [converting, setConverting] = useState(false);
   const [convertProgress, setConvertProgress] = useState(0);
+  const [pinnedPhotos, setPinnedPhotos] = useState<PinnedPhoto[]>(getPinnedPhotos());
+
+  const handleTogglePin = useCallback((photoId: string) => {
+    const updated = togglePinPhoto(photoId, venue?.id || '');
+    setPinnedPhotos(updated);
+  }, [venue?.id]);
 
   useEffect(() => {
     if (!venue) return;
@@ -186,6 +193,15 @@ export default function VenuePanel() {
                   </div>
                 )}
               </div>
+              <button
+                onClick={(ev) => { ev.stopPropagation(); handleTogglePin(p.id); }}
+                className={`absolute top-1 left-1 w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
+                  pinnedPhotos.some(pp => pp.photoId === p.id) ? 'bg-primary text-primary-foreground opacity-100' : 'bg-muted/80 text-muted-foreground'
+                }`}
+                title={pinnedPhotos.some(pp => pp.photoId === p.id) ? 'Remover destaque' : 'Fixar como destaque'}
+              >
+                <Pin className="w-3 h-3" />
+              </button>
               <button
                 onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
                 className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
