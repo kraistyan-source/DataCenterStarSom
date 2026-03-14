@@ -151,7 +151,7 @@ interface EventMapProps {
 }
 
 export default function EventMap({ onMapClick }: EventMapProps) {
-  const { venues, events, selectedVenueId, setSelectedVenueId, filters, setFilters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
+  const { venues, events, photos, selectedVenueId, setSelectedVenueId, filters, setFilters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
 
   // Compute venue IDs from the last N events
