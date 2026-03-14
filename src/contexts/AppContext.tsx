@@ -108,7 +108,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       filters, setFilters,
       presentationMode, setPresentationMode,
       presentationCity, setPresentationCity,
-      fullscreenPhotoIndex, fullscreenPhotos, openFullscreen, closeFullscreen,
+      fullscreenPhotoIndex, fullscreenPhotos, openFullscreen, closeFullscreen, navigateFullscreen,
       refresh,
       addingMarker, setAddingMarker,
       homeBase, setHomeBase, settingHomeBase, setSettingHomeBase,
