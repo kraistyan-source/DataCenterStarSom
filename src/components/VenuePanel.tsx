@@ -165,96 +165,182 @@ export default function VenuePanel() {
     await refresh();
   };
 
-  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>, mediaUrls: Record<string, string>) => (
-    <div className="p-3">
-      <button
-        onClick={() => fileRef.current?.click()}
-        className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
-      >
-        <Camera className="w-3.5 h-3.5" />
-        {category === 'evento' ? 'Adicionar Fotos/Vídeos do Evento' : 'Adicionar Fotos/Vídeos da Estrutura'}
-      </button>
-      <input ref={fileRef} type="file" accept="image/*,video/*,.heic,.heif" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+  // Get unique upload dates for current photos
+  const uploadDates = useMemo(() => {
+    const dates = new Set<string>();
+    photos.forEach(p => {
+      dates.add(new Date(p.createdAt).toISOString().slice(0, 10));
+    });
+    return [...dates].sort((a, b) => b.localeCompare(a));
+  }, [photos]);
 
-      {category === 'estrutura' && (
-        <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
-          <p className="text-[10px] text-muted-foreground font-body leading-relaxed">
-            <Wrench className="w-3 h-3 inline mr-1 text-primary" />
-            Fotos da estrutura montada <strong className="text-foreground">sem iluminação</strong> — para a equipe visualizar como ficou a montagem e ter referências.
-          </p>
-        </div>
-      )}
+  const filterByDate = (list: VenuePhoto[]) => {
+    if (!dateFilter) return list;
+    return list.filter(p => new Date(p.createdAt).toISOString().slice(0, 10) === dateFilter);
+  };
 
-      {photoList.length === 0 ? (
-        <p className="text-center text-xs text-muted-foreground py-8 font-body">
-          {category === 'evento' ? 'Nenhuma foto do evento' : 'Nenhuma foto da estrutura'}
-        </p>
-      ) : (
-        <div className="grid grid-cols-2 gap-1">
-          {photoList.map((p, i) => (
-            <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(photoList, i)}>
-              {p.mediaType === 'video' ? (
-                <>
-                  {p.thumbnail ? (
-                    <img src={p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
-                  ) : (
-                    <video className="w-full h-full object-cover" muted preload="metadata">
-                      <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
-                    </video>
-                  )}
-                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                    <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
-                      <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
-                    </div>
-                  </div>
-                </>
-              ) : (
-                <img src={mediaUrls[p.id] || p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
-              )}
-              <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
-                {p.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-0.5">
-                    {p.tags.map(t => (
-                      <span key={t} className="text-[8px] bg-primary/30 text-primary-foreground px-1 py-0.5">
-                        {PHOTO_TAGS.find(pt => pt.id === t)?.label || t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </div>
+  const formatDate = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit' });
+  };
+
+  const formatDateFull = (iso: string) => {
+    const d = new Date(iso);
+    return d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' });
+  };
+
+  // Group photos by date for display
+  const groupByDate = (list: VenuePhoto[]) => {
+    const groups: Record<string, VenuePhoto[]> = {};
+    list.forEach(p => {
+      const date = new Date(p.createdAt).toISOString().slice(0, 10);
+      if (!groups[date]) groups[date] = [];
+      groups[date].push(p);
+    });
+    return Object.entries(groups).sort((a, b) => b[0].localeCompare(a[0]));
+  };
+
+  const renderPhotoGrid = (photoList: VenuePhoto[], category: PhotoCategory, fileRef: React.RefObject<HTMLInputElement | null>, mediaUrls: Record<string, string>) => {
+    const filtered = filterByDate(photoList);
+    const grouped = groupByDate(filtered);
+    // Compute flat index offset for fullscreen
+    const flatFiltered = grouped.flatMap(([, ps]) => ps);
+
+    return (
+      <div className="p-3">
+        <button
+          onClick={() => fileRef.current?.click()}
+          className="w-full flex items-center justify-center gap-2 py-3 border border-dashed border-border text-muted-foreground hover:text-foreground hover:border-primary text-[10px] uppercase tracking-wider transition-colors mb-3"
+        >
+          <Camera className="w-3.5 h-3.5" />
+          {category === 'evento' ? 'Adicionar Fotos/Vídeos do Evento' : 'Adicionar Fotos/Vídeos da Estrutura'}
+        </button>
+        <input ref={fileRef} type="file" accept="image/*,video/*,.heic,.heif" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+
+        {/* Date filter */}
+        {uploadDates.length > 0 && (
+          <div className="mb-3 flex items-center gap-2 flex-wrap">
+            <CalendarDays className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <button
+              onClick={() => setDateFilter('')}
+              className={`text-[9px] px-2 py-0.5 border transition-colors ${
+                !dateFilter ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Todas
+            </button>
+            {uploadDates.map(d => (
               <button
-                onClick={(ev) => { ev.stopPropagation(); handleTogglePin(p.id); }}
-                className={`absolute top-1 left-1 w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
-                  pinnedPhotos.some(pp => pp.photoId === p.id) ? 'bg-primary text-primary-foreground opacity-100' : 'bg-muted/80 text-muted-foreground'
+                key={d}
+                onClick={() => setDateFilter(dateFilter === d ? '' : d)}
+                className={`text-[9px] px-2 py-0.5 border transition-colors ${
+                  dateFilter === d ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'
                 }`}
-                title={pinnedPhotos.some(pp => pp.photoId === p.id) ? 'Remover destaque' : 'Fixar como destaque'}
               >
-                <Pin className="w-3 h-3" />
+                {formatDate(d)}
               </button>
-              <button
-                onClick={async (ev) => {
-                  ev.stopPropagation();
-                  const newCat = category === 'evento' ? 'estrutura' : 'evento';
-                  await updatePhotoCategory(p.id, newCat);
-                  await refreshLocal();
-                }}
-                className="absolute top-1 left-7 w-5 h-5 bg-muted/80 text-muted-foreground hover:text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-                title={category === 'evento' ? 'Mover para Estrutura' : 'Mover para Evento'}
-              >
-                <ArrowRightLeft className="w-3 h-3" />
-              </button>
-              <button
-                onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
-                className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <Trash2 className="w-3 h-3" />
-              </button>
+            ))}
+          </div>
+        )}
+
+        {category === 'estrutura' && (
+          <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
+            <p className="text-[10px] text-muted-foreground font-body leading-relaxed">
+              <Wrench className="w-3 h-3 inline mr-1 text-primary" />
+              Fotos da estrutura montada <strong className="text-foreground">sem iluminação</strong> — para a equipe visualizar como ficou a montagem e ter referências.
+            </p>
+          </div>
+        )}
+
+        {flatFiltered.length === 0 ? (
+          <p className="text-center text-xs text-muted-foreground py-8 font-body">
+            {dateFilter ? 'Nenhuma foto nesta data' : (category === 'evento' ? 'Nenhuma foto do evento' : 'Nenhuma foto da estrutura')}
+          </p>
+        ) : (
+          grouped.map(([date, groupPhotos]) => (
+            <div key={date} className="mb-4">
+              <div className="flex items-center gap-2 mb-1.5">
+                <CalendarDays className="w-3 h-3 text-primary" />
+                <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-medium">
+                  {formatDateFull(date)}
+                </span>
+                <span className="text-[9px] text-muted-foreground">({groupPhotos.length})</span>
+              </div>
+              <div className="grid grid-cols-2 gap-1">
+                {groupPhotos.map((p) => {
+                  const flatIdx = flatFiltered.indexOf(p);
+                  return (
+                    <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(flatFiltered, flatIdx)}>
+                      {p.mediaType === 'video' ? (
+                        <>
+                          {p.thumbnail ? (
+                            <img src={p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
+                          ) : (
+                            <video className="w-full h-full object-cover" muted preload="metadata">
+                              <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
+                            </video>
+                          )}
+                          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                            <div className="w-10 h-10 rounded-full bg-primary/80 flex items-center justify-center">
+                              <Play className="w-5 h-5 text-primary-foreground ml-0.5" />
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <img src={mediaUrls[p.id] || p.data} alt={p.caption || 'Foto'} className="w-full h-full object-cover" />
+                      )}
+                      {/* Date badge */}
+                      <div className="absolute bottom-0 left-0 bg-background/70 text-[7px] text-muted-foreground px-1 py-0.5 font-mono">
+                        {formatDate(p.createdAt)}
+                      </div>
+                      <div className="absolute inset-0 bg-nocturne/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-1.5">
+                        {p.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-0.5">
+                            {p.tags.map(t => (
+                              <span key={t} className="text-[8px] bg-primary/30 text-primary-foreground px-1 py-0.5">
+                                {PHOTO_TAGS.find(pt => pt.id === t)?.label || t}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      <button
+                        onClick={(ev) => { ev.stopPropagation(); handleTogglePin(p.id); }}
+                        className={`absolute top-1 left-1 w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
+                          pinnedPhotos.some(pp => pp.photoId === p.id) ? 'bg-primary text-primary-foreground opacity-100' : 'bg-muted/80 text-muted-foreground'
+                        }`}
+                        title={pinnedPhotos.some(pp => pp.photoId === p.id) ? 'Remover destaque' : 'Fixar como destaque'}
+                      >
+                        <Pin className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={async (ev) => {
+                          ev.stopPropagation();
+                          const newCat = category === 'evento' ? 'estrutura' : 'evento';
+                          await updatePhotoCategory(p.id, newCat);
+                          await refreshLocal();
+                        }}
+                        className="absolute top-1 left-7 w-5 h-5 bg-muted/80 text-muted-foreground hover:text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                        title={category === 'evento' ? 'Mover para Estrutura' : 'Mover para Evento'}
+                      >
+                        <ArrowRightLeft className="w-3 h-3" />
+                      </button>
+                      <button
+                        onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
+                        className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          ))}
-        </div>
-      )}
-    </div>
-  );
+          ))
+        )}
+      </div>
+    );
+  };
 
   const tabs = [
     { key: 'evento' as const, label: `Evento (${eventPhotos.length})`, icon: Sparkles },
