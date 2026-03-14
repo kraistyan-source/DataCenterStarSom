@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { Search, MapPin, Download, Upload, Presentation, Plus, Home } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, MapPin, Download, Upload, Presentation, Plus, Home, Clock, Pin } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
 import { VENUE_TYPES, EVENT_TYPES } from '@/lib/db';
 import { exportDatabase, importDatabase } from '@/lib/db';
 import { distanceKm } from '@/lib/distance';
+import { getPinnedPhotos } from '@/lib/store';
 
 export default function Sidebar() {
   const {
