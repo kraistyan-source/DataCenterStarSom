@@ -194,6 +194,15 @@ export default function VenuePanel() {
                 )}
               </div>
               <button
+                onClick={(ev) => { ev.stopPropagation(); handleTogglePin(p.id); }}
+                className={`absolute top-1 left-1 w-5 h-5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity ${
+                  pinnedPhotos.some(pp => pp.photoId === p.id) ? 'bg-primary text-primary-foreground opacity-100' : 'bg-muted/80 text-muted-foreground'
+                }`}
+                title={pinnedPhotos.some(pp => pp.photoId === p.id) ? 'Remover destaque' : 'Fixar como destaque'}
+              >
+                <Pin className="w-3 h-3" />
+              </button>
+              <button
                 onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
                 className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
