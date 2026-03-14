@@ -14,7 +14,143 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      events: {
+        Row: {
+          client_type: string
+          created_at: string
+          date: string
+          event_type: string
+          id: string
+          name: string
+          notes: string
+          venue_id: string
+        }
+        Insert: {
+          client_type?: string
+          created_at?: string
+          date?: string
+          event_type?: string
+          id?: string
+          name: string
+          notes?: string
+          venue_id: string
+        }
+        Update: {
+          client_type?: string
+          created_at?: string
+          date?: string
+          event_type?: string
+          id?: string
+          name?: string
+          notes?: string
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      photos: {
+        Row: {
+          caption: string
+          category: string
+          created_at: string
+          event_id: string | null
+          id: string
+          media_type: string
+          mime_type: string | null
+          storage_path: string | null
+          tags: string[]
+          thumbnail_path: string | null
+          venue_id: string
+        }
+        Insert: {
+          caption?: string
+          category?: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          media_type?: string
+          mime_type?: string | null
+          storage_path?: string | null
+          tags?: string[]
+          thumbnail_path?: string | null
+          venue_id: string
+        }
+        Update: {
+          caption?: string
+          category?: string
+          created_at?: string
+          event_id?: string | null
+          id?: string
+          media_type?: string
+          mime_type?: string | null
+          storage_path?: string | null
+          tags?: string[]
+          thumbnail_path?: string | null
+          venue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "photos_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "photos_venue_id_fkey"
+            columns: ["venue_id"]
+            isOneToOne: false
+            referencedRelation: "venues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      venues: {
+        Row: {
+          address: string
+          capacity: string
+          city: string
+          created_at: string
+          id: string
+          lat: number
+          lng: number
+          name: string
+          notes: string
+          venue_type: string
+        }
+        Insert: {
+          address?: string
+          capacity?: string
+          city?: string
+          created_at?: string
+          id?: string
+          lat: number
+          lng: number
+          name: string
+          notes?: string
+          venue_type?: string
+        }
+        Update: {
+          address?: string
+          capacity?: string
+          city?: string
+          created_at?: string
+          id?: string
+          lat?: number
+          lng?: number
+          name?: string
+          notes?: string
+          venue_type?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

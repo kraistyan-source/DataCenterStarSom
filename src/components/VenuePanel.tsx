@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { X, Plus, Trash2, Camera, Calendar, Tag, Wrench, Sparkles, Video, Play, Loader2, Pin, ArrowRightLeft } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
@@ -17,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VenuePanel() {
   const { selectedVenueId, setSelectedVenueId, venues, refresh, openFullscreen } = useApp();
+  const isMobile = useIsMobile();
   const venue = venues.find(v => v.id === selectedVenueId);
   const [photos, setPhotos] = useState<VenuePhoto[]>([]);
   const [events, setEvents] = useState<VenueEvent[]>([]);
@@ -260,15 +262,26 @@ export default function VenuePanel() {
     { key: 'info' as const, label: 'Info', icon: Tag },
   ];
 
+  const panelClasses = isMobile
+    ? 'fixed inset-x-0 bottom-0 h-[85vh] bg-card border-t border-border z-[2000] flex flex-col overflow-hidden rounded-t-xl'
+    : 'absolute right-0 top-0 h-full w-[400px] bg-card border-l border-border z-[1000] flex flex-col overflow-hidden';
+
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'tween', duration: 0.3 }}
-        className="absolute right-0 top-0 h-full w-[400px] bg-card border-l border-border z-[1000] flex flex-col overflow-hidden"
+        initial={isMobile ? { y: '100%' } : { x: '100%' }}
+        animate={isMobile ? { y: 0 } : { x: 0 }}
+        exit={isMobile ? { y: '100%' } : { x: '100%' }}
+        transition={{ type: 'tween' as const, duration: 0.3 }}
+        className={panelClasses}
       >
+        {/* Mobile drag handle */}
+        {isMobile && (
+          <div className="flex justify-center pt-2 pb-1">
+            <div className="w-10 h-1 rounded-full bg-muted-foreground/30" />
+          </div>
+        )}
+
         {/* Conversion overlay */}
         {converting && (
           <div className="absolute inset-0 z-50 bg-background/80 backdrop-blur-sm flex flex-col items-center justify-center gap-3">

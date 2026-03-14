@@ -146,3 +146,19 @@
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(0 0% 22%);
 }
+
+/* Safe area for mobile bottom nav */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Mobile touch optimizations */
+@media (max-width: 767px) {
+  .leaflet-control-zoom {
+    display: none !important;
+  }
+  
+  .leaflet-control-attribution {
+    font-size: 7px !important;
+  }
+}
