@@ -50,7 +50,17 @@ export async function convertToMp4(
   const outputName = 'output.mp4';
 
   await ff.writeFile(inputName, await fetchFile(file));
-  await ff.exec(['-i', inputName, '-c:v', 'libx264', '-preset', 'fast', '-crf', '28', '-c:a', 'aac', '-movflags', '+faststart', outputName]);
+  await ff.exec([
+    '-i', inputName,
+    '-c:v', 'libx264',
+    '-preset', 'ultrafast',
+    '-crf', '32',
+    '-vf', 'scale=-2:720',
+    '-r', '30',
+    '-c:a', 'aac', '-b:a', '96k',
+    '-movflags', '+faststart',
+    outputName,
+  ]);
 
   const rawData = await ff.readFile(outputName);
   // Cleanup

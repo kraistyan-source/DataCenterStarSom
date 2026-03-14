@@ -207,7 +207,7 @@ export default function EventMap({ onMapClick }: EventMapProps) {
       />
       <MapController />
       <ZoomTracker onZoomChange={setZoom} />
-      {addingMarker && <MapClickHandler onMapClick={onMapClick} />}
+      <MapClickHandler onMapClick={onMapClick} />
       {settingHomeBase && <HomeBaseClickHandler onSet={handleHomeBaseClick} />}
       {homeBase && (
         <Marker position={[homeBase.lat, homeBase.lng]} icon={homeBaseIcon}>
