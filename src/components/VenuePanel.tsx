@@ -10,6 +10,7 @@ import {
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
 import { extractVideoThumbnail } from '@/lib/video-thumbnail';
+import { getPinnedPhotos, togglePinPhoto, type PinnedPhoto } from '@/lib/store';
 import { Progress } from '@/components/ui/progress';
 import { motion, AnimatePresence } from 'framer-motion';
 

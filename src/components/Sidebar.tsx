@@ -178,7 +178,66 @@ export default function Sidebar() {
             ))}
           </div>
         </div>
+        {/* Last N Events filter */}
+        <div>
+          <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-1 block">Recentes</label>
+          <div className="flex flex-wrap gap-1">
+            <button
+              onClick={() => setFilters({ lastNEvents: null })}
+              className={`text-[10px] px-2 py-0.5 border transition-colors ${
+                !filters.lastNEvents ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Todos
+            </button>
+            <button
+              onClick={() => setFilters({ lastNEvents: filters.lastNEvents === 5 ? null : 5 })}
+              className={`text-[10px] px-2 py-0.5 border transition-colors flex items-center gap-1 ${
+                filters.lastNEvents === 5 ? 'bg-primary text-primary-foreground border-primary' : 'border-border text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Clock className="w-3 h-3" />
+              Últimos 5
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* Pinned Photos Section */}
+      {(() => {
+        const pinned = getPinnedPhotos();
+        if (pinned.length === 0) return null;
+        const pinnedPhotoObjects = pinned.map(p => photos.find(ph => ph.id === p.photoId)).filter(Boolean);
+        if (pinnedPhotoObjects.length === 0) return null;
+        return (
+          <div className="p-3 border-b border-border">
+            <label className="text-[10px] uppercase tracking-widest text-muted-foreground mb-2 block flex items-center gap-1">
+              <Pin className="w-3 h-3 text-primary" />
+              Destaques ({pinnedPhotoObjects.length}/3)
+            </label>
+            <div className="flex gap-1">
+              {pinnedPhotoObjects.map((p) => p && (
+                <div
+                  key={p.id}
+                  className="w-16 h-16 bg-muted overflow-hidden cursor-pointer border border-primary/40 hover:border-primary transition-colors"
+                  onClick={() => {
+                    const venue = venues.find(v => v.id === p.venueId);
+                    if (venue) setSelectedVenueId(venue.id);
+                  }}
+                >
+                  {p.thumbnail ? (
+                    <img src={p.thumbnail} alt="Destaque" className="w-full h-full object-cover" />
+                  ) : p.mediaType === 'video' ? (
+                    <div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-[8px]">VID</div>
+                  ) : (
+                    <img src={p.data} alt="Destaque" className="w-full h-full object-cover" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
 
       {/* Actions */}
       <div className="p-3 border-b border-border flex gap-2">
