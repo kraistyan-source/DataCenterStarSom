@@ -203,6 +203,18 @@ export default function VenuePanel() {
                 <Pin className="w-3 h-3" />
               </button>
               <button
+                onClick={async (ev) => {
+                  ev.stopPropagation();
+                  const newCat = category === 'evento' ? 'estrutura' : 'evento';
+                  await updatePhotoCategory(p.id, newCat);
+                  await refreshLocal();
+                }}
+                className="absolute top-1 left-7 w-5 h-5 bg-muted/80 text-muted-foreground hover:text-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+                title={category === 'evento' ? 'Mover para Estrutura' : 'Mover para Evento'}
+              >
+                <ArrowRightLeft className="w-3 h-3" />
+              </button>
+              <button
                 onClick={async (ev) => { ev.stopPropagation(); await deletePhoto(p.id); await refreshLocal(); }}
                 className="absolute top-1 right-1 w-5 h-5 bg-destructive text-destructive-foreground flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
               >
