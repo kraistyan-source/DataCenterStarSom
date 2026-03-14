@@ -18,6 +18,7 @@ export default function Sidebar() {
     roadDistances,
   } = useApp();
 
+  const { signOut } = useAuth();
   const [importing, setImporting] = useState(false);
 
   const cities = [...new Set(venues.map(v => v.city))].sort();
