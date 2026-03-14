@@ -40,6 +40,7 @@ export async function uploadToCloud(
     for (const v of venues) {
       await supabase.from('venues').upsert({
         id: v.id,
+        user_id: userId,
         name: v.name,
         city: v.city,
         address: v.address,
