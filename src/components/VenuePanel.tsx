@@ -9,6 +9,7 @@ import {
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
+import heic2any from 'heic2any';
 import { extractVideoThumbnail } from '@/lib/video-thumbnail';
 import { getPinnedPhotos, togglePinPhoto, type PinnedPhoto } from '@/lib/store';
 import { Progress } from '@/components/ui/progress';
@@ -102,7 +103,20 @@ export default function VenuePanel() {
         });
         await refreshLocal();
       } else {
-        // Photos: keep base64 (they're small)
+        // Photos: convert HEIC to JPEG, then store as base64
+        let imageFile: Blob = file;
+        const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+          file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
+
+        if (isHeic) {
+          try {
+            const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
+            imageFile = Array.isArray(converted) ? converted[0] : converted;
+          } catch (err) {
+            console.error('HEIC conversion failed:', err);
+          }
+        }
+
         const reader = new FileReader();
         reader.onload = async (ev) => {
           const data = ev.target?.result as string;
@@ -116,7 +130,7 @@ export default function VenuePanel() {
           });
           await refreshLocal();
         };
-        reader.readAsDataURL(file);
+        reader.readAsDataURL(imageFile);
       }
     }
     e.target.value = '';
@@ -145,7 +159,7 @@ export default function VenuePanel() {
         <Camera className="w-3.5 h-3.5" />
         {category === 'evento' ? 'Adicionar Fotos/Vídeos do Evento' : 'Adicionar Fotos/Vídeos da Estrutura'}
       </button>
-      <input ref={fileRef} type="file" accept="image/*,video/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+      <input ref={fileRef} type="file" accept="image/*,video/*,.heic,.heif" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
 
       {category === 'estrutura' && (
         <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
