@@ -41,9 +41,14 @@ const DEFAULT_ZOOM = 10;
 const LABEL_MIN_ZOOM = 11;
 
 function MapClickHandler({ onMapClick }: { onMapClick: (lat: number, lng: number) => void }) {
+  const { setSelectedVenueId, addingMarker } = useApp();
   useMapEvents({
     click(e) {
-      onMapClick(e.latlng.lat, e.latlng.lng);
+      if (addingMarker) {
+        onMapClick(e.latlng.lat, e.latlng.lng);
+      } else {
+        setSelectedVenueId(null);
+      }
     },
   });
   return null;
