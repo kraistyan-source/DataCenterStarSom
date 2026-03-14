@@ -103,17 +103,29 @@ export default function VenuePanel() {
         });
         await refreshLocal();
       } else {
-        // Photos: convert HEIC to JPEG, then store as base64
+        // Photos: convert HEIC/HEIF to JPEG/PNG, then store as base64
         let imageFile: Blob = file;
-        const isHeic = file.type === 'image/heic' || file.type === 'image/heif' ||
+        const byMimeOrExt = file.type === 'image/heic' || file.type === 'image/heif' ||
           file.name.toLowerCase().endsWith('.heic') || file.name.toLowerCase().endsWith('.heif');
+        const detectedHeic = byMimeOrExt || await isHeic(file).catch(() => false);
 
-        if (isHeic) {
+        if (detectedHeic) {
           try {
-            const converted = await heic2any({ blob: file, toType: 'image/jpeg', quality: 0.85 });
-            imageFile = Array.isArray(converted) ? converted[0] : converted;
-          } catch (err) {
-            console.error('HEIC conversion failed:', err);
+            const convertedJpeg = await heicTo({ blob: file, type: 'image/jpeg', quality: 0.85 });
+            imageFile = convertedJpeg instanceof Blob
+              ? convertedJpeg
+              : new Blob([convertedJpeg], { type: 'image/jpeg' });
+          } catch (jpegErr) {
+            try {
+              const convertedPng = await heicTo({ blob: file, type: 'image/png', quality: 0.9 });
+              imageFile = convertedPng instanceof Blob
+                ? convertedPng
+                : new Blob([convertedPng], { type: 'image/png' });
+            } catch (pngErr) {
+              console.error('HEIC conversion failed:', pngErr || jpegErr);
+              alert('Não foi possível converter este arquivo HEIC. Tente exportar como JPG no iPhone e enviar novamente.');
+              continue;
+            }
           }
         }
 
