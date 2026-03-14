@@ -56,6 +56,7 @@
     "date-fns": "^3.6.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.35.2",
+    "heic-to": "^1.4.2",
     "heic2any": "^0.0.4",
     "idb": "^8.0.3",
     "input-otp": "^1.4.2",
