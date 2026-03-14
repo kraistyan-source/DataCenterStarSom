@@ -18,6 +18,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function VenuePanel() {
   const { selectedVenueId, setSelectedVenueId, venues, refresh, openFullscreen } = useApp();
+  const isMobile = useIsMobile();
   const venue = venues.find(v => v.id === selectedVenueId);
   const [photos, setPhotos] = useState<VenuePhoto[]>([]);
   const [events, setEvents] = useState<VenueEvent[]>([]);
