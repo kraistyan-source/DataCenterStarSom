@@ -151,16 +151,30 @@ interface EventMapProps {
 }
 
 export default function EventMap({ onMapClick }: EventMapProps) {
-  const { venues, events, selectedVenueId, setSelectedVenueId, filters, setFilters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
+  const { venues, events, photos, selectedVenueId, setSelectedVenueId, filters, setFilters, addingMarker, presentationMode, presentationCity, homeBase, settingHomeBase, setSettingHomeBase, setHomeBase, roadDistances } = useApp();
   const [zoom, setZoom] = useState(DEFAULT_ZOOM);
 
-  // Compute venue IDs from the last N events
+  // Compute venue IDs from the last N activity (photos or events, whichever is most recent per venue)
   const lastNEventVenueIds = useMemo(() => {
     if (!filters.lastNEvents) return null;
-    const sorted = [...events].sort((a, b) => new Date(b.date || b.createdAt).getTime() - new Date(a.date || a.createdAt).getTime());
-    const lastN = sorted.slice(0, filters.lastNEvents);
-    return new Set(lastN.map(e => e.venueId));
-  }, [events, filters.lastNEvents]);
+    // Collect most recent activity timestamp per venue from photos and events
+    const venueLatest: Record<string, number> = {};
+    for (const p of photos) {
+      const t = new Date(p.createdAt).getTime();
+      if (!venueLatest[p.venueId] || t > venueLatest[p.venueId]) {
+        venueLatest[p.venueId] = t;
+      }
+    }
+    for (const e of events) {
+      const t = new Date(e.date || e.createdAt).getTime();
+      if (!venueLatest[e.venueId] || t > venueLatest[e.venueId]) {
+        venueLatest[e.venueId] = t;
+      }
+    }
+    const sorted = Object.entries(venueLatest).sort((a, b) => b[1] - a[1]);
+    const topN = sorted.slice(0, filters.lastNEvents).map(([id]) => id);
+    return new Set(topN);
+  }, [events, photos, filters.lastNEvents]);
 
   const filteredVenues = venues.filter(v => {
     if (presentationMode && presentationCity && v.city !== presentationCity) return false;
