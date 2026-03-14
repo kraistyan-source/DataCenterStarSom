@@ -329,19 +329,28 @@ export default function Sidebar() {
       </div>
 
       {/* Footer */}
-      <div className="p-3 border-t border-border flex gap-2">
+      <div className="p-3 border-t border-border space-y-2">
+        <div className="flex gap-2">
+          <button
+            onClick={handleExport}
+            className="flex-1 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-1.5 border border-border text-muted-foreground hover:text-foreground transition-colors"
+          >
+            <Download className="w-3 h-3" />
+            Exportar
+          </button>
+          <label className="flex-1 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-1.5 border border-border text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
+            <Upload className="w-3 h-3" />
+            {importing ? 'Importando...' : 'Importar'}
+            <input type="file" accept=".json" onChange={handleImport} className="hidden" />
+          </label>
+        </div>
         <button
-          onClick={handleExport}
-          className="flex-1 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-1.5 border border-border text-muted-foreground hover:text-foreground transition-colors"
+          onClick={signOut}
+          className="w-full flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-1.5 border border-destructive/30 text-destructive hover:bg-destructive/10 transition-colors"
         >
-          <Download className="w-3 h-3" />
-          Exportar
+          <LogOut className="w-3 h-3" />
+          Sair
         </button>
-        <label className="flex-1 flex items-center justify-center gap-1.5 text-[10px] uppercase tracking-wider py-1.5 border border-border text-muted-foreground hover:text-foreground transition-colors cursor-pointer">
-          <Upload className="w-3 h-3" />
-          {importing ? 'Importando...' : 'Importar'}
-          <input type="file" accept=".json" onChange={handleImport} className="hidden" />
-        </label>
       </div>
     </div>
   );
