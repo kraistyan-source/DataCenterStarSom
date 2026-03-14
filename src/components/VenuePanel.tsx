@@ -159,7 +159,7 @@ export default function VenuePanel() {
         <Camera className="w-3.5 h-3.5" />
         {category === 'evento' ? 'Adicionar Fotos/Vídeos do Evento' : 'Adicionar Fotos/Vídeos da Estrutura'}
       </button>
-      <input ref={fileRef} type="file" accept="image/*,video/*" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
+      <input ref={fileRef} type="file" accept="image/*,video/*,.heic,.heif" multiple onChange={e => handlePhotoUpload(e, category)} className="hidden" />
 
       {category === 'estrutura' && (
         <div className="mb-3 p-2 border border-gold-dim/30 bg-muted/50">
