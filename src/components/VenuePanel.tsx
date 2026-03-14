@@ -262,14 +262,19 @@ export default function VenuePanel() {
     { key: 'info' as const, label: 'Info', icon: Tag },
   ];
 
+  const panelClasses = isMobile
+    ? 'fixed inset-x-0 bottom-0 h-[85vh] bg-card border-t border-border z-[2000] flex flex-col overflow-hidden rounded-t-xl'
+    : 'absolute right-0 top-0 h-full w-[400px] bg-card border-l border-border z-[1000] flex flex-col overflow-hidden';
+
+  const motionProps = isMobile
+    ? { initial: { y: '100%' }, animate: { y: 0 }, exit: { y: '100%' }, transition: { type: 'tween', duration: 0.3 } }
+    : { initial: { x: '100%' }, animate: { x: 0 }, exit: { x: '100%' }, transition: { type: 'tween', duration: 0.3 } };
+
   return (
     <AnimatePresence>
       <motion.div
-        initial={{ x: '100%' }}
-        animate={{ x: 0 }}
-        exit={{ x: '100%' }}
-        transition={{ type: 'tween', duration: 0.3 }}
-        className="absolute right-0 top-0 h-full w-[400px] bg-card border-l border-border z-[1000] flex flex-col overflow-hidden"
+        {...motionProps}
+        className={panelClasses}
       >
         {/* Conversion overlay */}
         {converting && (
