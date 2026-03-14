@@ -20,6 +20,7 @@ interface AppState {
   setPresentationCity: (city: string | null) => void;
   openFullscreen: (photos: VenuePhoto[], index: number) => void;
   closeFullscreen: () => void;
+  navigateFullscreen: (dir: number) => void;
   refresh: () => Promise<void>;
   addingMarker: boolean;
   setAddingMarker: (v: boolean) => void;
