@@ -5,10 +5,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
-  getPhotosByVenue, getEventsByVenue,
-  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue, updatePhotoCategory,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
+import {
+  getPhotosByVenue, getEventsByVenue,
+  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue, updatePhotoCategory,
+  getMediaUrl,
+} from '@/lib/cloud-db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
 import { heicTo, isHeic } from 'heic-to';
 import { extractVideoThumbnail } from '@/lib/video-thumbnail';

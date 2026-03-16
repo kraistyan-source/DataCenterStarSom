@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useApp } from '@/contexts/AppContext';
-import { getPhotosByVenue } from '@/lib/db';
+import { getPhotosByVenue } from '@/lib/cloud-db';
 import type { VenuePhoto } from '@/lib/db';
 import { motion } from 'framer-motion';
 
