@@ -58,6 +58,8 @@ export interface VenuePhoto {
   caption: string;
   tags: string[];
   createdAt: string;
+  storagePath?: string; // cloud storage path for media
+  thumbnailPath?: string; // cloud storage path for thumbnail
 }
 
 export interface VenueEvent {

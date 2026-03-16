@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
-import { addVenue, VENUE_TYPES } from '@/lib/db';
+import { VENUE_TYPES } from '@/lib/db';
+import { addVenue } from '@/lib/cloud-db';
 import { useApp } from '@/contexts/AppContext';
 
 interface AddVenueDialogProps {

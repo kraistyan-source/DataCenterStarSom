@@ -5,10 +5,13 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useMediaUrls } from '@/hooks/use-media-url';
 import {
   type Venue, type VenuePhoto, type VenueEvent, type PhotoCategory,
-  getPhotosByVenue, getEventsByVenue,
-  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue, updatePhotoCategory,
   VENUE_TYPES, EVENT_TYPES, PHOTO_TAGS,
 } from '@/lib/db';
+import {
+  getPhotosByVenue, getEventsByVenue,
+  addPhoto, deletePhoto, addEvent, deleteEvent, deleteVenue, updateVenue, updatePhotoCategory,
+  getMediaUrl,
+} from '@/lib/cloud-db';
 import { needsConversion, convertToMp4 } from '@/lib/video-converter';
 import { heicTo, isHeic } from 'heic-to';
 import { extractVideoThumbnail } from '@/lib/video-thumbnail';
@@ -274,8 +277,8 @@ export default function VenuePanel() {
                     <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(flatFiltered, flatIdx)}>
                       {p.mediaType === 'video' ? (
                         <>
-                          {p.thumbnail ? (
-                            <img src={p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
+                          {(p.thumbnail || p.thumbnailPath) ? (
+                            <img src={p.thumbnailPath ? getMediaUrl(p).thumbUrl : p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
                           ) : (
                             <video className="w-full h-full object-cover" muted preload="metadata">
                               <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
