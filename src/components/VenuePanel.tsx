@@ -277,8 +277,8 @@ export default function VenuePanel() {
                     <div key={p.id} className="relative group aspect-square overflow-hidden bg-muted cursor-pointer" onClick={() => openFullscreen(flatFiltered, flatIdx)}>
                       {p.mediaType === 'video' ? (
                         <>
-                          {p.thumbnail ? (
-                            <img src={p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
+                          {(p.thumbnail || p.thumbnailPath) ? (
+                            <img src={p.thumbnailPath ? getMediaUrl(p).thumbUrl : p.thumbnail} alt="Video thumbnail" className="w-full h-full object-cover" />
                           ) : (
                             <video className="w-full h-full object-cover" muted preload="metadata">
                               <source src={mediaUrls[p.id] || p.data} type={p.mimeType || 'video/mp4'} />
